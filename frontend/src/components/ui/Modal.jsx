@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useEffect } from 'react';
 
 export const Modal = ({ isOpen, onClose, title, children, className = 'max-w-md' }) => {
   useEffect(() => {
@@ -22,8 +21,10 @@ export const Modal = ({ isOpen, onClose, title, children, className = 'max-w-md'
       <div className={`relative w-full bg-white rounded-xl shadow-xl border border-slate-100 flex flex-col max-h-[90vh] z-10 animate-in fade-in zoom-in-95 duration-150 ${className}`}>
         <div className="flex items-center justify-between p-4 border-b border-slate-100">
           <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-all">
-            <X size={18} />
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 transition-all" aria-label="Close modal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
           </button>
         </div>
         <div className="p-5 overflow-y-auto flex-1 text-sm text-slate-600">
