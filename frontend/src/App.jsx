@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { clearAuthSession, getStoredAuthSession } from './api/auth'
+import Dashboard from './pages/dashboard/Dashboard'
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
 import './App.css'
@@ -15,34 +16,7 @@ function App() {
   }
 
   if (session?.user) {
-    return (
-      <main className="signed-in-screen">
-        <section className="signed-in-panel">
-          <div>
-            <p className="eyebrow">Signed in</p>
-            <h1>Welcome, {session.user.name}</h1>
-            <p className="signed-in-copy">
-              Ready to draft the next proposal.
-            </p>
-          </div>
-
-          <dl className="session-summary">
-            <div>
-              <dt>Name</dt>
-              <dd>{session.user.name}</dd>
-            </div>
-            <div>
-              <dt>Email</dt>
-              <dd>{session.user.email}</dd>
-            </div>
-          </dl>
-
-          <button type="button" className="ghost-button" onClick={handleSignOut}>
-            Sign out
-          </button>
-        </section>
-      </main>
-    )
+    return <Dashboard user={session.user} onSignOut={handleSignOut} />
   }
 
   return (
