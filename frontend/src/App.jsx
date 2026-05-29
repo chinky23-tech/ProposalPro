@@ -16,7 +16,13 @@ function App() {
   }
 
   if (session?.user) {
-    return <Dashboard user={session.user} onSignOut={handleSignOut} />
+    return (
+      <Dashboard
+        user={session.user}
+        token={session.token}
+        onSignOut={handleSignOut}
+      />
+    )
   }
 
   return (
