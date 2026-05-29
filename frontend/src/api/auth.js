@@ -15,7 +15,7 @@ const parseResponse = async (response) => {
   }
 }
 
-const request = async (path, { method = 'GET', body, token } = {}) => {
+export const request = async (path, { method = 'GET', body, token } = {}) => {
   const headers = {
     Accept: 'application/json',
   }
