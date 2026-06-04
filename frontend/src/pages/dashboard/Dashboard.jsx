@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import proposalsApi from "../../api/proposals";
 
 const navItems = ["Overview", "AI Builder", "Proposals", "Clients", "Analytics"];
@@ -8,6 +8,9 @@ const ideaItems = [
   "Proposal scoring highlights weak pricing, scope, and proof sections.",
   "Reusable service packs help freelancers and agencies quote faster.",
 ];
+
+const defaultBrief =
+  "Website redesign for a growing SaaS team. Include discovery, UX, implementation, timeline, pricing, and proof points.";
 
 const DashboardIcon = ({ type }) => {
   const paths = {
@@ -25,15 +28,27 @@ const DashboardIcon = ({ type }) => {
   );
 };
 
+const EmptyState = ({ children }) => (
+  <div className="empty-state">{children}</div>
+);
+
 const Dashboard = ({ user, token, onSignOut }) => {
   const firstName = user?.name?.split(" ")[0] || "there";
 
-  // Data State
+  const [activeSection, setActiveSection] = useState("Overview");
   const [proposals, setProposals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [clients, setClients] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(Boolean(token));
+  const [sectionLoading, setSectionLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Modals & Form State
+  const [brief, setBrief] = useState(defaultBrief);
+  const [draftResult, setDraftResult] = useState(null);
+  const [scoreResult, setScoreResult] = useState(null);
+  const [appliedSuggestion, setAppliedSuggestion] = useState(null);
+  const [actionLoading, setActionLoading] = useState("");
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingProposal, setEditingProposal] = useState(null);
 
@@ -43,7 +58,6 @@ const Dashboard = ({ user, token, onSignOut }) => {
   const [formStatus, setFormStatus] = useState("Draft");
   const [formScore, setFormScore] = useState("0");
 
-  // Fetch Proposals
   const fetchProposals = async () => {
     try {
       setLoading(true);
@@ -57,13 +71,77 @@ const Dashboard = ({ user, token, onSignOut }) => {
     }
   };
 
-  useEffect(() => {
-    if (token) {
-      fetchProposals();
+  const fetchClients = async () => {
+    try {
+      setSectionLoading(true);
+      setError(null);
+      const data = await proposalsApi.getClients(token);
+      setClients(data);
+    } catch (err) {
+      setError(err.message || "Failed to load clients");
+    } finally {
+      setSectionLoading(false);
     }
+  };
+
+  const fetchAnalytics = async () => {
+    try {
+      setSectionLoading(true);
+      setError(null);
+      const data = await proposalsApi.getAnalytics(token);
+      setAnalytics(data);
+    } catch (err) {
+      setError(err.message || "Failed to load analytics");
+    } finally {
+      setSectionLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadInitialProposals = async () => {
+      if (!token) {
+        return;
+      }
+
+      try {
+        const data = await proposalsApi.getProposals(token);
+
+        if (isMounted) {
+          setProposals(data);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || "Failed to load proposals");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadInitialProposals();
+
+    return () => {
+      isMounted = false;
+    };
   }, [token]);
 
-  // Dynamic Statistics Calculations
+  const handleSectionChange = (item) => {
+    setActiveSection(item);
+
+    if (item === "Clients") {
+      fetchClients();
+    } else if (item === "Analytics") {
+      fetchAnalytics();
+    } else if (item === "Proposals") {
+      fetchProposals();
+    }
+  };
+
   const reviewCount = proposals.filter((p) => p.status === "Review").length;
   const totalScore = proposals.reduce(
     (acc, curr) => acc + (parseInt(curr.score, 10) || 0),
@@ -90,7 +168,6 @@ const Dashboard = ({ user, token, onSignOut }) => {
     },
   ];
 
-  // Currency Formatter
   const formatCurrency = (val) => {
     const num = parseFloat(val);
     if (isNaN(num)) return "$0";
@@ -101,7 +178,6 @@ const Dashboard = ({ user, token, onSignOut }) => {
     }).format(num);
   };
 
-  // Open Create Form Modal
   const openCreateModal = () => {
     setFormClient("");
     setFormTitle("");
@@ -111,7 +187,6 @@ const Dashboard = ({ user, token, onSignOut }) => {
     setIsCreateOpen(true);
   };
 
-  // Open Edit Form Modal
   const openEditModal = (proposal) => {
     setEditingProposal(proposal);
     setFormClient(proposal.client);
@@ -121,7 +196,18 @@ const Dashboard = ({ user, token, onSignOut }) => {
     setFormScore(String(proposal.score));
   };
 
-  // Form Submit: Create Proposal
+  const refreshCurrentSection = async () => {
+    await fetchProposals();
+
+    if (activeSection === "Clients") {
+      await fetchClients();
+    }
+
+    if (activeSection === "Analytics") {
+      await fetchAnalytics();
+    }
+  };
+
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     if (!formClient.trim() || !formTitle.trim()) {
@@ -141,13 +227,12 @@ const Dashboard = ({ user, token, onSignOut }) => {
         token
       );
       setIsCreateOpen(false);
-      fetchProposals();
+      refreshCurrentSection();
     } catch (err) {
       alert(err.message || "Failed to create proposal");
     }
   };
 
-  // Form Submit: Update Proposal
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
     if (!formClient.trim() || !formTitle.trim()) {
@@ -168,13 +253,12 @@ const Dashboard = ({ user, token, onSignOut }) => {
         token
       );
       setEditingProposal(null);
-      fetchProposals();
+      refreshCurrentSection();
     } catch (err) {
       alert(err.message || "Failed to update proposal");
     }
   };
 
-  // Action: Delete Proposal
   const handleDeleteClick = async () => {
     if (!window.confirm("Are you sure you want to delete this proposal?")) {
       return;
@@ -183,10 +267,359 @@ const Dashboard = ({ user, token, onSignOut }) => {
     try {
       await proposalsApi.deleteProposal(editingProposal.id, token);
       setEditingProposal(null);
-      fetchProposals();
+      refreshCurrentSection();
     } catch (err) {
       alert(err.message || "Failed to delete proposal");
     }
+  };
+
+  const handleGenerateDraft = async () => {
+    try {
+      setActionLoading("draft");
+      setError(null);
+      const data = await proposalsApi.generateDraft({ brief }, token);
+      setDraftResult(data.draft);
+    } catch (err) {
+      setError(err.message || "Failed to generate draft");
+    } finally {
+      setActionLoading("");
+    }
+  };
+
+  const handleImproveWinScore = async () => {
+    try {
+      setActionLoading("score");
+      setError(null);
+      const data = await proposalsApi.improveWinScore(
+        { brief, currentScore: averageScore || 62 },
+        token
+      );
+      setScoreResult(data);
+      setBrief(data.improvedBrief);
+    } catch (err) {
+      setError(err.message || "Failed to improve win score");
+    } finally {
+      setActionLoading("");
+    }
+  };
+
+  const handleApplySuggestion = async () => {
+    try {
+      setActionLoading("suggestion");
+      setError(null);
+      const data = await proposalsApi.applySuggestion(
+        {
+          suggestion:
+            "Add a short case study and a clearer payment milestone to lift the proposal score.",
+        },
+        token
+      );
+      setAppliedSuggestion(data);
+    } catch (err) {
+      setError(err.message || "Failed to apply suggestion");
+    } finally {
+      setActionLoading("");
+    }
+  };
+
+  const renderStats = () => (
+    <section className="stats-grid" aria-label="Proposal metrics">
+      {stats.map((stat) => (
+        <article className="metric-card" key={stat.label}>
+          <span>{stat.label}</span>
+          <strong>{stat.value}</strong>
+          <small>{stat.detail}</small>
+        </article>
+      ))}
+    </section>
+  );
+
+  const renderAiBuilder = () => (
+    <article className="ai-workbench">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">AI proposal builder</p>
+          <h2>Turn a client brief into a deal-ready draft.</h2>
+        </div>
+        <span className="status-pill">API ready</span>
+      </div>
+
+      <label htmlFor="brief">Client brief</label>
+      <textarea
+        id="brief"
+        rows="5"
+        value={brief}
+        onChange={(e) => setBrief(e.target.value)}
+      />
+
+      <div className="builder-actions">
+        <button
+          type="button"
+          onClick={handleGenerateDraft}
+          disabled={actionLoading === "draft"}
+        >
+          <span aria-hidden="true">*</span>
+          {actionLoading === "draft" ? "Generating..." : "Generate draft"}
+        </button>
+        <button
+          type="button"
+          onClick={handleImproveWinScore}
+          disabled={actionLoading === "score"}
+        >
+          <span aria-hidden="true">^</span>
+          {actionLoading === "score" ? "Improving..." : "Improve win score"}
+        </button>
+      </div>
+
+      {draftResult && (
+        <div className="ai-result-card">
+          <p className="eyebrow">Generated draft</p>
+          <h3>{draftResult.title}</h3>
+          <p>{draftResult.executiveSummary}</p>
+          <div className="draft-section-grid">
+            {draftResult.sections.map((section) => (
+              <div key={section.heading}>
+                <strong>{section.heading}</strong>
+                <span>{section.body}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {scoreResult && (
+        <div className="score-result-card">
+          <div>
+            <span>Previous score</span>
+            <strong>{scoreResult.previousScore}%</strong>
+          </div>
+          <div>
+            <span>Improved score</span>
+            <strong>{scoreResult.improvedScore}%</strong>
+          </div>
+          <ul>
+            {scoreResult.recommendations.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </article>
+  );
+
+  const renderIdeas = () => (
+    <article className="idea-panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Product direction</p>
+          <h2>What Proposal Pro AI should become</h2>
+        </div>
+      </div>
+
+      <ul>
+        {ideaItems.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </article>
+  );
+
+  const renderProposalTable = (title = "Recent proposals") => (
+    <article className="proposal-table">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Pipeline</p>
+          <h2>{title}</h2>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <span>Fetching proposals...</span>
+        </div>
+      ) : proposals.length === 0 ? (
+        <EmptyState>No proposals found. Click New proposal to create one.</EmptyState>
+      ) : (
+        <div className="proposal-list">
+          {proposals.map((proposal) => (
+            <div
+              className="proposal-row proposal-row-clickable"
+              key={proposal.id}
+              onClick={() => openEditModal(proposal)}
+              title="Click to edit or delete"
+            >
+              <div>
+                <strong>{proposal.client}</strong>
+                <span>{proposal.title}</span>
+              </div>
+              <span>{formatCurrency(proposal.value)}</span>
+              <span>{proposal.status}</span>
+              <span>{proposal.score}%</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </article>
+  );
+
+  const renderInsight = () => (
+    <article className="insight-panel">
+      <div>
+        <p className="eyebrow">AI insight</p>
+        <h2>{appliedSuggestion ? "Suggestion applied" : "Best next move"}</h2>
+        <p>
+          {appliedSuggestion
+            ? appliedSuggestion.updatedInsight
+            : "Add a short case study and a clearer payment milestone to lift the Northstar proposal score."}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={handleApplySuggestion}
+        disabled={actionLoading === "suggestion"}
+      >
+        <span aria-hidden="true">+</span>
+        {actionLoading === "suggestion" ? "Applying..." : "Apply suggestion"}
+      </button>
+    </article>
+  );
+
+  const renderClients = () => (
+    <section className="single-view">
+      <article className="proposal-table">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Clients</p>
+            <h2>Client proposal activity</h2>
+          </div>
+        </div>
+
+        {sectionLoading ? (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <span>Fetching clients...</span>
+          </div>
+        ) : clients.length === 0 ? (
+          <EmptyState>Create a proposal to see client activity here.</EmptyState>
+        ) : (
+          <div className="client-grid">
+            {clients.map((client) => (
+              <div className="client-card" key={client.client}>
+                <strong>{client.client}</strong>
+                <span>{client.proposal_count} proposals</span>
+                <span>{formatCurrency(client.total_value)} total value</span>
+                <small>{client.average_score}% average score</small>
+              </div>
+            ))}
+          </div>
+        )}
+      </article>
+    </section>
+  );
+
+  const renderAnalytics = () => {
+    const analyticsStats = analytics
+      ? [
+          {
+            label: "Total value",
+            value: formatCurrency(analytics.total_value),
+            detail: "All proposals",
+          },
+          {
+            label: "Average score",
+            value: `${analytics.average_score}%`,
+            detail: "Win readiness",
+          },
+          {
+            label: "Sent rate",
+            value: `${analytics.win_rate}%`,
+            detail: "Sent proposals",
+          },
+        ]
+      : [];
+
+    return (
+      <section className="single-view">
+        {sectionLoading ? (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <span>Fetching analytics...</span>
+          </div>
+        ) : !analytics ? (
+          <EmptyState>Analytics will appear after your proposals load.</EmptyState>
+        ) : (
+          <>
+            <section className="stats-grid" aria-label="Analytics metrics">
+              {analyticsStats.map((stat) => (
+                <article className="metric-card" key={stat.label}>
+                  <span>{stat.label}</span>
+                  <strong>{stat.value}</strong>
+                  <small>{stat.detail}</small>
+                </article>
+              ))}
+            </section>
+
+            <article className="proposal-table">
+              <div className="section-heading">
+                <div>
+                  <p className="eyebrow">Status breakdown</p>
+                  <h2>Proposal movement</h2>
+                </div>
+              </div>
+              <div className="analytics-list">
+                {analytics.status_breakdown.map((item) => (
+                  <div key={item.status}>
+                    <span>{item.status}</span>
+                    <strong>{item.count}</strong>
+                  </div>
+                ))}
+              </div>
+            </article>
+          </>
+        )}
+      </section>
+    );
+  };
+
+  const renderSection = () => {
+    if (activeSection === "AI Builder") {
+      return (
+        <section className="dashboard-grid ai-builder-view">
+          {renderAiBuilder()}
+          {renderIdeas()}
+          {renderInsight()}
+        </section>
+      );
+    }
+
+    if (activeSection === "Proposals") {
+      return (
+        <section className="single-view">
+          {renderProposalTable("All proposals")}
+        </section>
+      );
+    }
+
+    if (activeSection === "Clients") {
+      return renderClients();
+    }
+
+    if (activeSection === "Analytics") {
+      return renderAnalytics();
+    }
+
+    return (
+      <>
+        {renderStats()}
+        <section className="dashboard-grid">
+          {renderAiBuilder()}
+          {renderIdeas()}
+          {renderProposalTable()}
+          {renderInsight()}
+        </section>
+      </>
+    );
   };
 
   return (
@@ -203,12 +636,14 @@ const Dashboard = ({ user, token, onSignOut }) => {
         </div>
 
         <nav className="sidebar-nav" aria-label="Dashboard navigation">
-          {navItems.map((item, index) => (
+          {navItems.map((item) => (
             <button
               type="button"
-              className={index === 0 ? "is-active" : ""}
+              className={activeSection === item ? "is-active" : ""}
               key={item}
               aria-label={item}
+              aria-current={activeSection === item ? "page" : undefined}
+              onClick={() => handleSectionChange(item)}
             >
               <DashboardIcon type={item} />
               <span>{item}</span>
@@ -240,7 +675,11 @@ const Dashboard = ({ user, token, onSignOut }) => {
         <header className="dashboard-header">
           <div>
             <p className="eyebrow">Proposal Pro AI</p>
-            <h1>Welcome back, {firstName}</h1>
+            <h1>
+              {activeSection === "Overview"
+                ? `Welcome back, ${firstName}`
+                : activeSection}
+            </h1>
             <p>
               Create professional, winning proposals in minutes instead of days.
             </p>
@@ -255,123 +694,9 @@ const Dashboard = ({ user, token, onSignOut }) => {
           </button>
         </header>
 
-        <section className="stats-grid" aria-label="Proposal metrics">
-          {stats.map((stat) => (
-            <article className="metric-card" key={stat.label}>
-              <span>{stat.label}</span>
-              <strong>{stat.value}</strong>
-              <small>{stat.detail}</small>
-            </article>
-          ))}
-        </section>
-
-        <section className="dashboard-grid">
-          <article className="ai-workbench">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">AI proposal builder</p>
-                <h2>Turn a client brief into a deal-ready draft.</h2>
-              </div>
-              <span className="status-pill">Live brief</span>
-            </div>
-
-            <label htmlFor="brief">Client brief</label>
-            <textarea
-              id="brief"
-              rows="5"
-              defaultValue="Website redesign for a growing SaaS team. Include discovery, UX, implementation, timeline, pricing, and proof points."
-            />
-
-            <div className="builder-actions">
-              <button type="button">
-                <span aria-hidden="true">*</span>
-                Generate draft
-              </button>
-              <button type="button">
-                <span aria-hidden="true">^</span>
-                Improve win score
-              </button>
-            </div>
-          </article>
-
-          <article className="idea-panel">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">Product direction</p>
-                <h2>What Proposal Pro AI should become</h2>
-              </div>
-            </div>
-
-            <ul>
-              {ideaItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </article>
-
-          <article className="proposal-table">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">Pipeline</p>
-                <h2>Recent proposals</h2>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="loading-container">
-                <div className="loading-spinner"></div>
-                <span>Fetching proposals...</span>
-              </div>
-            ) : proposals.length === 0 ? (
-              <div
-                style={{
-                  padding: "36px 0",
-                  textAlign: "center",
-                  color: "var(--text-muted)",
-                }}
-              >
-                No proposals found. Click &quot;New proposal&quot; above to create one.
-              </div>
-            ) : (
-              <div className="proposal-list">
-                {proposals.map((proposal) => (
-                  <div
-                    className="proposal-row proposal-row-clickable"
-                    key={proposal.id}
-                    onClick={() => openEditModal(proposal)}
-                    title="Click to Edit or Delete"
-                  >
-                    <div>
-                      <strong>{proposal.client}</strong>
-                      <span>{proposal.title}</span>
-                    </div>
-                    <span>{formatCurrency(proposal.value)}</span>
-                    <span>{proposal.status}</span>
-                    <span>{proposal.score}%</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </article>
-
-          <article className="insight-panel">
-            <div>
-              <p className="eyebrow">AI insight</p>
-              <h2>Best next move</h2>
-              <p>
-                Add a short case study and a clearer payment milestone to lift
-                the Northstar proposal score.
-              </p>
-            </div>
-            <button type="button">
-              <span aria-hidden="true">+</span>
-              Apply suggestion
-            </button>
-          </article>
-        </section>
+        {renderSection()}
       </section>
 
-      {/* CREATE PROPOSAL MODAL */}
       {isCreateOpen && (
         <div className="modal-overlay" onClick={() => setIsCreateOpen(false)}>
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
@@ -467,7 +792,6 @@ const Dashboard = ({ user, token, onSignOut }) => {
         </div>
       )}
 
-      {/* EDIT/DELETE PROPOSAL MODAL */}
       {editingProposal && (
         <div
           className="modal-overlay"
