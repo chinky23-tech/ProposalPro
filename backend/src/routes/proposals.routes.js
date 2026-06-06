@@ -1,8 +1,13 @@
 import { Router } from "express";
 import {
+  applySuggestion,
   createProposal,
+  generateDraft,
+  getAnalyticsSummary,
+  getClientsSummary,
   getProposals,
   getProposalById,
+  improveWinScore,
   updateProposal,
   deleteProposal
 } from "../controllers/proposals.controller.js";
@@ -12,6 +17,12 @@ const router = Router();
 
 // Apply authentication middleware to all routes in this router
 router.use(protect);
+
+router.post("/ai/draft", generateDraft);
+router.post("/ai/improve-score", improveWinScore);
+router.post("/ai/apply-suggestion", applySuggestion);
+router.get("/clients", getClientsSummary);
+router.get("/analytics", getAnalyticsSummary);
 
 /**
  * @openapi
