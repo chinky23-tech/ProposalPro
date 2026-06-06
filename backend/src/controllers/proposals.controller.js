@@ -1,3 +1,4 @@
+import OpenAI from "openai";
 import pool from "../config/db.js";
 
 // Helper function to sanitize monetary values
@@ -9,6 +10,245 @@ const parseMonetaryValue = (value) => {
   const cleaned = String(value).replace(/[^0-9.-]+/g, "");
   const parsed = parseFloat(cleaned);
   return isNaN(parsed) ? 0.00 : parsed;
+};
+
+const cleanBrief = (brief) => {
+  const normalizedBrief = String(brief || "").trim();
+  return normalizedBrief;
+};
+
+const getOpenAIClient = () => {
+  if (!process.env.OPENAI_API_KEY) {
+    return null;
+  }
+
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+};
+
+const requireOpenAIClient = (res) => {
+  const client = getOpenAIClient();
+
+  if (!client) {
+    res.status(503).json({
+      message: "OPENAI_API_KEY is not configured for real-time AI generation",
+    });
+    return null;
+  }
+
+  return client;
+};
+
+const createJsonCompletion = async ({ messages }) => {
+  const client = getOpenAIClient();
+  const completion = await client.chat.completions.create({
+    model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+    temperature: 0.2,
+    response_format: { type: "json_object" },
+    messages,
+  });
+
+  const content = completion.choices?.[0]?.message?.content;
+
+  if (!content) {
+    throw new Error("AI provider returned an empty response");
+  }
+
+  return JSON.parse(content);
+};
+
+const generateDraft = async (req, res) => {
+  try {
+    const brief = cleanBrief(req.body.brief);
+
+    if (!brief) {
+      return res.status(400).json({ message: "Client brief is required" });
+    }
+
+    if (!requireOpenAIClient(res)) {
+      return;
+    }
+
+    const draft = await createJsonCompletion({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You generate professional proposal drafts. Return only valid JSON with keys: title, executiveSummary, sections, nextSteps. sections must be an array of objects with heading and body. nextSteps must be an array of strings. Base everything only on the user's brief.",
+        },
+        {
+          role: "user",
+          content: `Client brief:\n${brief}`,
+        },
+      ],
+    });
+
+    res.status(200).json({
+      message: "Draft generated successfully",
+      brief,
+      draft,
+    });
+  } catch (error) {
+    console.error("Generate draft error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const improveWinScore = async (req, res) => {
+  try {
+    const brief = cleanBrief(req.body.brief);
+    const currentScore = Number.isFinite(Number(req.body.currentScore))
+      ? Number(req.body.currentScore)
+      : null;
+
+    if (!brief) {
+      return res.status(400).json({ message: "Client brief is required" });
+    }
+
+    if (!requireOpenAIClient(res)) {
+      return;
+    }
+
+    const scoreResult = await createJsonCompletion({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You improve proposal win readiness. Return only valid JSON with keys: previousScore, improvedScore, recommendations, improvedBrief. previousScore and improvedScore must be numbers from 0 to 100. recommendations must be an array of strings. Base everything only on the user's brief and provided current score.",
+        },
+        {
+          role: "user",
+          content: JSON.stringify({ brief, currentScore }),
+        },
+      ],
+    });
+
+    res.status(200).json({
+      message: "Win score improved",
+      ...scoreResult,
+    });
+  } catch (error) {
+    console.error("Improve win score error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const applySuggestion = async (req, res) => {
+  try {
+    const brief = cleanBrief(req.body.brief);
+    const suggestion = String(req.body.suggestion || "").trim();
+
+    if (!brief) {
+      return res.status(400).json({ message: "Client brief is required" });
+    }
+
+    if (!suggestion) {
+      return res.status(400).json({ message: "Suggestion is required" });
+    }
+
+    if (!requireOpenAIClient(res)) {
+      return;
+    }
+
+    const appliedResult = await createJsonCompletion({
+      messages: [
+        {
+          role: "system",
+          content:
+            "You apply proposal improvement suggestions. Return only valid JSON with keys: updatedBrief, updatedInsight, actionItems. actionItems must be an array of strings. Base everything only on the user's brief and selected suggestion.",
+        },
+        {
+          role: "user",
+          content: JSON.stringify({ brief, suggestion }),
+        },
+      ],
+    });
+
+    res.status(200).json({
+      message: "Suggestion applied",
+      applied: true,
+      suggestion,
+      ...appliedResult,
+    });
+  } catch (error) {
+    console.error("Apply suggestion error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const getClientsSummary = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await pool.query(
+      `
+      SELECT
+        client,
+        COUNT(*)::int AS proposal_count,
+        COALESCE(SUM(value), 0)::float AS total_value,
+        COALESCE(ROUND(AVG(score)), 0)::int AS average_score,
+        MAX(created_at) AS latest_activity
+      FROM proposals
+      WHERE user_id = $1
+      GROUP BY client
+      ORDER BY latest_activity DESC
+      `,
+      [userId]
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Get clients summary error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const getAnalyticsSummary = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const [summaryResult, statusResult] = await Promise.all([
+      pool.query(
+        `
+        SELECT
+          COUNT(*)::int AS total_proposals,
+          COALESCE(SUM(value), 0)::float AS total_value,
+          COALESCE(ROUND(AVG(score)), 0)::int AS average_score,
+          COUNT(*) FILTER (WHERE status = 'Sent')::int AS sent_count,
+          COUNT(*) FILTER (WHERE status = 'Review')::int AS review_count,
+          COUNT(*) FILTER (WHERE status = 'Draft')::int AS draft_count
+        FROM proposals
+        WHERE user_id = $1
+        `,
+        [userId]
+      ),
+      pool.query(
+        `
+        SELECT status, COUNT(*)::int AS count
+        FROM proposals
+        WHERE user_id = $1
+        GROUP BY status
+        ORDER BY status
+        `,
+        [userId]
+      ),
+    ]);
+
+    const summary = summaryResult.rows[0];
+    const winRate = summary.total_proposals > 0
+      ? Math.round((summary.sent_count / summary.total_proposals) * 100)
+      : 0;
+
+    res.status(200).json({
+      ...summary,
+      win_rate: winRate,
+      status_breakdown: statusResult.rows,
+    });
+  } catch (error) {
+    console.error("Get analytics summary error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 // @desc    Create a new proposal
@@ -206,9 +446,14 @@ const deleteProposal = async (req, res) => {
 };
 
 export {
+  applySuggestion,
   createProposal,
+  generateDraft,
+  getAnalyticsSummary,
+  getClientsSummary,
   getProposals,
   getProposalById,
+  improveWinScore,
   updateProposal,
   deleteProposal
 };
