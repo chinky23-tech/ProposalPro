@@ -58,7 +58,7 @@ function App() {
           </div>
           <div className="preview-total">
             <span></span>
-            <strong>$18,400</strong>
+            <span></span>
           </div>
         </div>
       </section>
