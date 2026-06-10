@@ -21,7 +21,7 @@ export const Select = React.forwardRef(({
           className={`w-full appearance-none px-3 py-2 text-sm border rounded-lg bg-white focus:outline-none focus:ring-2 transition-all pr-10
             ${error 
               ? 'border-red-400 focus:ring-red-200 focus:border-red-500' 
-              : 'border-slate-200 focus:ring-blue-100 focus:border-blue-500'
+              : 'border-slate-200 focus:ring-teal-100 focus:border-teal-600'
             }`}
           {...props}
         >
