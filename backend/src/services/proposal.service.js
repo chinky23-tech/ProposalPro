@@ -1,0 +1,54 @@
+import {
+  createProposal,
+  getAllProposals,
+  getProposalById,
+  updateProposal,
+  deleteProposal,
+  proposalExists,
+} from "../repositories/proposal.repository.js";
+
+export const createProposalService = async (proposalData) => {
+  return await createProposal(proposalData);
+};
+
+export const getProposalsService = async (userId) => {
+  return await getAllProposals(userId);
+};
+
+export const getProposalByIdService = async (proposalId, userId) => {
+  return await getProposalById(proposalId, userId);
+};
+
+export const updateProposalService = async ({
+  proposalId,
+  userId,
+  client,
+  title,
+  value,
+  status,
+  score,
+}) => {
+  const existing = await proposalExists(proposalId, userId);
+
+  if (!existing) {
+    return null;
+  }
+
+  // Clean the incoming status value up front
+  const trimmedStatus = status?.trim();
+
+  return await updateProposal({
+    proposalId,
+    userId,
+    client: client ?? existing.client,
+    title: title ?? existing.title,
+    value: value ?? existing.value,
+    score: score ?? existing.score,
+    // If trimmedStatus is an empty string or undefined, use existing status
+    status: trimmedStatus || existing.status, 
+  });
+};
+
+export const deleteProposalService = async (proposalId, userId) => {
+  return await deleteProposal(proposalId, userId);
+};
