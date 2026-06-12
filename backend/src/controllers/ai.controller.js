@@ -13,8 +13,14 @@ import {
 // Generate draft
 export const generateDraft = async (req, res) => {
   try {
-    const brief = validateBrief(req.body.brief);
+    // Safety check: Make sure req.body exists
+    const body = req.body || {};
+    
+    if (!body.brief) {
+      return res.status(400).json({ message: "The 'brief' property is required in the request body." });
+    }
 
+    const brief = validateBrief(body.brief);
     const result = await generateDraftService({ brief });
 
     return res.status(200).json(result);
@@ -25,9 +31,7 @@ export const generateDraft = async (req, res) => {
       error?.message?.includes("required") ||
       error?.message?.includes("between")
     ) {
-      return res.status(400).json({
-        message: error.message,
-      });
+      return res.status(400).json({ message: error.message });
     }
 
     return res.status(500).json({
@@ -39,7 +43,13 @@ export const generateDraft = async (req, res) => {
 // Improve winscore
 export const improveWinScore = async (req, res) => {
   try {
-    const data = validateImproveScore(req.body);
+    const body = req.body || {};
+    
+    // Safety check: Ensure the validation yields a valid object
+    const data = validateImproveScore(body);
+    if (!data) {
+      return res.status(400).json({ message: "Invalid request data. Please provide a brief." });
+    }
 
     const result = await improveWinScoreService(data);
 
@@ -51,9 +61,7 @@ export const improveWinScore = async (req, res) => {
       error?.message?.includes("required") ||
       error?.message?.includes("between")
     ) {
-      return res.status(400).json({
-        message: error.message,
-      });
+      return res.status(400).json({ message: error.message });
     }
 
     return res.status(500).json({
@@ -65,7 +73,12 @@ export const improveWinScore = async (req, res) => {
 // Apply suggestion
 export const applySuggestion = async (req, res) => {
   try {
-    const data = validateSuggestion(req.body);
+    const body = req.body || {};
+
+    const data = validateSuggestion(body);
+    if (!data) {
+      return res.status(400).json({ message: "Invalid request data. Missing required components." });
+    }
 
     const result = await applySuggestionService(data);
 
@@ -77,9 +90,7 @@ export const applySuggestion = async (req, res) => {
       error?.message?.includes("required") ||
       error?.message?.includes("between")
     ) {
-      return res.status(400).json({
-        message: error.message,
-      });
+      return res.status(400).json({ message: error.message });
     }
 
     return res.status(500).json({
