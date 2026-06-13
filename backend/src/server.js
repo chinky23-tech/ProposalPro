@@ -8,7 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import proposalRoutes from "./routes/proposal.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
-/*import clientsRoutes from "./routes/clients.routes.js";*/
+import clientsRoutes from "./routes/clients.routes.js";
 
 const app = express();
 
@@ -32,7 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/proposals", proposalRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/analytics", analyticsRoutes);
-/*app.use("/api/clients", clientsRoutes);*/
+app.use("/api/clients", clientsRoutes);
 
 const PORT = process.env.PORT || 5000;
 
