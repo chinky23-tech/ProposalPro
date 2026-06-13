@@ -1,28 +1,72 @@
-import pool from "../config/db.js";
+import { 
+  createClientService, 
+  getClientsByUserService, 
+  getClientByIdService,
+  updateClientService,
+  deleteClientService
+} from "../services/clients.service.js";
+import { validateClientInput } from "../validations/clients.validation.js";
+import { successResponse, createdResponse } from "../utils/response.util.js";
+import { handleError } from "../utils/error.util.js";
 
-export const getClientsSummary = async (req, res) => {
+//  Create a New Client
+export const createClient = async (req, res) => {
   try {
-    const userId = req.user.id;
-
-    const result = await pool.query(
-      `
-      SELECT
-        client,
-        COUNT(*)::int AS proposal_count,
-        COALESCE(SUM(value), 0)::float AS total_value,
-        COALESCE(ROUND(AVG(score)), 0)::int AS average_score,
-        MAX(created_at) AS latest_activity
-      FROM proposals
-      WHERE user_id = $1
-      GROUP BY client
-      ORDER BY latest_activity DESC
-      `,
-      [userId]
-    );
-
-    res.status(200).json(result.rows);
+    // Run sanity checks on body
+    const validatedData = validateClientInput(req.body);
+    
+    // Pass user ID from auth middleware + validated client details to service layer
+    const newClient = await createClientService(req.user.id, validatedData);
+    
+    return createdResponse(res, newClient, "Client profile registered successfully");
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    return handleError(res, error, "CreateClientController");
+  }
+};
+
+//  Get All Clients for the logged-in User
+export const getClients = async (req, res) => {
+  try {
+    const clients = await getClientsByUserService(req.user.id);
+    return successResponse(res, clients, "Clients retrieved successfully");
+  } catch (error) {
+    return handleError(res, error, "GetClientsController");
+  }
+};
+
+//  Get a Single Client by ID
+export const getClientById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const client = await getClientByIdService(req.user.id, id);
+    
+    return successResponse(res, client, "Client details retrieved successfully");
+  } catch (error) {
+    return handleError(res, error, "GetClientByIdController");
+  }
+};
+
+//  Update an Existing Client
+export const updateClient = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const validatedData = validateClientInput(req.body);
+    
+    const updatedClient = await updateClientService(req.user.id, id, validatedData);
+    return successResponse(res, updatedClient, "Client profile updated successfully");
+  } catch (error) {
+    return handleError(res, error, "UpdateClientController");
+  }
+};
+
+//  Delete a Client
+export const deleteClient = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await deleteClientService(req.user.id, id);
+    
+    return successResponse(res, null, "Client profile removed successfully");
+  } catch (error) {
+    return handleError(res, error, "DeleteClientController");
   }
 };
