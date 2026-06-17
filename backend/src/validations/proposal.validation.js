@@ -2,6 +2,8 @@ export const validateCreateProposal = ({
   client,
   title,
   score,
+  brief,
+  content,
 }) => {
   if (!client || !client.trim()) {
     throw new Error("Client name is required");
@@ -31,6 +33,8 @@ export const validateCreateProposal = ({
     client: client.trim(),
     title: title.trim(),
     score: parsedScore,
+    brief: brief !== undefined ? brief.trim() : null,
+    content: content !== undefined ? content.trim() : null,
   };
 };
 
@@ -38,6 +42,8 @@ export const validateUpdateProposal = ({
   client,
   title,
   score,
+  brief,   
+  content, 
 }) => {
   if (
     client !== undefined &&
@@ -57,19 +63,23 @@ export const validateUpdateProposal = ({
     );
   }
 
-  let parsedScore = null;
+  let parsedScore = undefined; // Default to undefined so it isn't overwritten if not passed
 
-  if (score !== undefined && score !== null) {
-    parsedScore = parseInt(score, 10);
+  if (score !== undefined) {
+    if (score === null) {
+      parsedScore = null;
+    } else {
+      parsedScore = parseInt(score, 10);
 
-    if (
-      Number.isNaN(parsedScore) ||
-      parsedScore < 0 ||
-      parsedScore > 100
-    ) {
-      throw new Error(
-        "Score must be an integer between 0 and 100"
-      );
+      if (
+        Number.isNaN(parsedScore) ||
+        parsedScore < 0 ||
+        parsedScore > 100
+      ) {
+        throw new Error(
+          "Score must be an integer between 0 and 100"
+        );
+      }
     }
   }
 
@@ -85,5 +95,17 @@ export const validateUpdateProposal = ({
         : undefined,
 
     score: parsedScore,
+
+    // Safely handles partial updates for brief
+    brief:
+      brief !== undefined
+        ? (brief === null ? null : brief.trim())
+        : undefined,
+
+    // Safely handles partial updates for content
+    content:
+      content !== undefined
+        ? (content === null ? null : content.trim())
+        : undefined,
   };
 };

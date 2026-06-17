@@ -27,6 +27,8 @@ export const updateProposalService = async ({
   value,
   status,
   score,
+  brief,   // <-- Added brief
+  content, // <-- Added content
 }) => {
   const existing = await proposalExists(proposalId, userId);
 
@@ -46,6 +48,8 @@ export const updateProposalService = async ({
     score: score ?? existing.score,
     // If trimmedStatus is an empty string or undefined, use existing status
     status: trimmedStatus || existing.status, 
+    brief: brief ?? existing.brief,     // <-- Added brief fallback logic
+    content: content ?? existing.content, // <-- Added content fallback logic
   });
 };
 

@@ -7,14 +7,19 @@ export const createProposal = async ({
   value,
   status,
   score,
+  brief,   
+  content, 
 }) => {
   const result = await pool.query(
     `
-    INSERT INTO proposals (user_id, client, title, value, status, score)
-    VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO proposals (user_id, client, title, value, status, score, brief, content)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *
     `,
-    [userId, client, title, value, status, score]
+    [userId, client, title, value, status, score, 
+      brief ? JSON.stringify(brief) : null, 
+      content ? JSON.stringify(content) : null 
+    ]
   );
 
   return result.rows[0];
@@ -55,6 +60,8 @@ export const updateProposal = async ({
   value,
   status,
   score,
+  brief,   // <-- Added brief
+  content, // <-- Added content
 }) => {
   const result = await pool.query(
     `
@@ -64,11 +71,15 @@ export const updateProposal = async ({
       title = $2,
       value = $3,
       status = $4,
-      score = $5
-    WHERE id = $6 AND user_id = $7
+      score = $5,
+      brief = $6,
+      content = $7
+    WHERE id = $8 AND user_id = $9
     RETURNING *
     `,
-    [client, title, value, status, score, proposalId, userId]
+    [client, title, value, status, score,, proposalId, userId, 
+      brief ? JSON.stringify(brief) : null, 
+      content ? JSON.stringify(content) : null ]
   );
 
   return result.rows[0];
