@@ -5,7 +5,7 @@ import {
   uploadDocument,
   getDocumentDownloadUrl,
   deleteDocument,
-} from "../controllers/document.controller.js"; // Adjusted path to match your controller folder layout
+} from "../controllers/document.controller.js"; 
 
 const router = Router();
 
