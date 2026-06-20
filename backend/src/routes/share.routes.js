@@ -5,14 +5,14 @@ import protect from "../middleware/auth.middleware.js";
 const router = Router();
 
 /**
- * @swagger
+ * @openapi
  * tags:
  *   name: Proposal Sharing
  *   description: API operations for managing secure public proposal link distributions and tracking.
  */
 
 /**
- * @swagger
+ * @openapi
  * /api/proposals/{proposalId}/share:
  *   post:
  *     summary: Generate a secure share link and dispatch it to a client via Resend
@@ -24,7 +24,7 @@ const router = Router();
  *         name: proposalId
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *           format: uuid
  *         description: The unique identifier of the proposal to be shared.
  *     requestBody:
@@ -80,7 +80,7 @@ const router = Router();
 router.post("/proposals/:proposalId/share", protect, createLinkAndSendEmail);
 
 /**
- * @swagger
+ * @openapi
  * /api/public/proposals/share/{token}:
  *   get:
  *     summary: Fetch basic proposal layout configuration elements using an unauthenticated public token string
