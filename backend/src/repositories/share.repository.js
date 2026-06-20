@@ -14,7 +14,7 @@ export const createShare = async ({ proposalId, token, expiresAt }) => {
 
 export const findByToken = async (token) => {
   const query = `
-    SELECT ps.*, p.title as proposal_title, p.content as proposal_content, p.owner_id
+    SELECT ps.*, p.title as proposal_title, p.content as proposal_content, p.user_id
     FROM proposal_shares ps
     JOIN proposals p ON ps.proposal_id = p.id
     WHERE ps.token = $1;
