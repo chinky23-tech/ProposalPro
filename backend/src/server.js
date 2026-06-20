@@ -39,7 +39,7 @@ app.use("/api/clients", clientsRoutes);
 app.use("/api/packages", packagesRoutes);
 app.use("/api/templates", templatesRouter);
 app.use("/api/documents", documentRoutes);
-app.use("/api/shares", shareRoutes);
+app.use("/api", shareRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
