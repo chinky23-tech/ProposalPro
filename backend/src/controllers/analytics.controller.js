@@ -1,52 +1,23 @@
-import pool from "../config/db.js";
+import * as analyticsService from "../services/analytics.service.js";
 
+/**
+ * Handles the HTTP request layer to return the processed dashboard statistics summary
+ */
 export const getAnalyticsSummary = async (req, res) => {
   try {
+    // 1. Extract the authenticated user ID added by your protect middleware
     const userId = req.user.id;
 
-    const [summaryResult, statusResult] = await Promise.all([
-      pool.query(
-        `
-        SELECT
-          COUNT(*)::int AS total_proposals,
-          COALESCE(SUM(value), 0)::float AS total_value,
-          COALESCE(ROUND(AVG(score)), 0)::int AS average_score,
-          COUNT(*) FILTER (WHERE status = 'Sent')::int AS sent_count,
-          COUNT(*) FILTER (WHERE status = 'Review')::int AS review_count,
-          COUNT(*) FILTER (WHERE status = 'Draft')::int AS draft_count
-        FROM proposals
-        WHERE user_id = $1
-        `,
-        [userId]
-      ),
-      pool.query(
-        `
-        SELECT status, COUNT(*)::int AS count
-        FROM proposals
-        WHERE user_id = $1
-        GROUP BY status
-        ORDER BY status
-        `,
-        [userId]
-      ),
-    ]);
+    // 2. Delegate data gathering and business rules to the service layer
+    const processedSummary = await analyticsService.calculateAnalyticsSummary(userId);
 
-    const summary = summaryResult.rows[0];
-
-    const winRate =
-      summary.total_proposals > 0
-        ? Math.round(
-            (summary.sent_count / summary.total_proposals) * 100
-          )
-        : 0;
-
-    res.status(200).json({
-      ...summary,
-      win_rate: winRate,
-      status_breakdown: statusResult.rows,
-    });
+    // 3. Return the clean JSON structure
+    return res.status(200).json(processedSummary);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    console.error("Analytics controller processing failure:", error);
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message || "Internal server error assembling metrics pipeline data engines." 
+    });
   }
 };
