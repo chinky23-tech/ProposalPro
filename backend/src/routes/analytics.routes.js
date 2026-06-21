@@ -1,12 +1,11 @@
 import { Router } from "express";
 import protect from "../middleware/auth.middleware.js";
-
-import {
-  getAnalyticsSummary,
-} from "../controllers/analytics.controller.js";
+import { getAnalyticsSummary } from "../controllers/analytics.controller.js";
+import { validateAnalyticsQuery } from "../validations/analytics.validation.js";
 
 const router = Router();
 
+// Secure all underlying analytics pathways with the token guard layer
 router.use(protect);
 
 /**
@@ -14,14 +13,14 @@ router.use(protect);
  * /api/analytics:
  *   get:
  *     summary: Get analytics dashboard summary
- *     description: Returns proposal statistics, revenue metrics, average scores, and proposal status breakdown for the authenticated user.
+ *     description: Returns complete proposal lifecycle statistics, revenue metrics, win rates, and deep pipeline distributions for the authenticated user.
  *     tags:
  *       - Analytics
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       '200':
- *         description: Analytics summary retrieved successfully
+ *         description: Analytics summaries successfully calculated and extracted.
  *         content:
  *           application/json:
  *             schema:
@@ -32,22 +31,37 @@ router.use(protect);
  *                   example: 25
  *                 total_value:
  *                   type: number
- *                   example: 125000
+ *                   example: 125000.50
  *                 average_score:
  *                   type: integer
  *                   example: 84
- *                 sent_count:
- *                   type: integer
- *                   example: 10
- *                 review_count:
- *                   type: integer
- *                   example: 5
  *                 draft_count:
  *                   type: integer
- *                   example: 10
+ *                   example: 4
+ *                 review_count:
+ *                   type: integer
+ *                   example: 2
+ *                 sent_count:
+ *                   type: integer
+ *                   example: 5
+ *                 viewed_count:
+ *                   type: integer
+ *                   example: 6
+ *                 accepted_count:
+ *                   type: integer
+ *                   example: 3
+ *                 rejected_count:
+ *                   type: integer
+ *                   example: 1
+ *                 won_count:
+ *                   type: integer
+ *                   example: 3
+ *                 lost_count:
+ *                   type: integer
+ *                   example: 1
  *                 win_rate:
  *                   type: integer
- *                   example: 40
+ *                   example: 60
  *                 status_breakdown:
  *                   type: array
  *                   items:
@@ -55,15 +69,15 @@ router.use(protect);
  *                     properties:
  *                       status:
  *                         type: string
- *                         example: Draft
+ *                         example: Viewed
  *                       count:
  *                         type: integer
- *                         example: 10
+ *                         example: 6
  *       '401':
- *         description: Unauthorized
+ *         description: Unauthorized - Bearer token missing or expired.
  *       '500':
- *         description: Server error
+ *         description: Internal Server Error processing metric data streams.
  */
-router.get("/", getAnalyticsSummary);
+router.get("/", validateAnalyticsQuery, getAnalyticsSummary);
 
 export default router;
