@@ -58,3 +58,28 @@ export const getPublicProposalByToken = async (token) => {
     viewCount: sharedAsset.view_count + 1
   };
 };
+/**
+ * Public action to accept a proposal via its tracking token
+ */
+export const acceptPublicProposal = async (token) => {
+  const sharedAsset = await shareRepository.findByToken(token);
+  if (!sharedAsset) throw new Error("Invalid access token specifier");
+  if (new Date() > new Date(sharedAsset.expires_at)) throw new Error("This secure proposal link has expired");
+
+  // Advance status to 'Accepted'
+  await shareRepository.updateProposalStatus(sharedAsset.proposal_id, "Accepted");
+  return { title: sharedAsset.proposal_title, status: "Accepted" };
+};
+
+/**
+ * Public action to decline/reject a proposal via its tracking token
+ */
+export const rejectPublicProposal = async (token) => {
+  const sharedAsset = await shareRepository.findByToken(token);
+  if (!sharedAsset) throw new Error("Invalid access token specifier");
+  if (new Date() > new Date(sharedAsset.expires_at)) throw new Error("This secure proposal link has expired");
+
+  // Advance status to 'Rejected'
+  await shareRepository.updateProposalStatus(sharedAsset.proposal_id, "Rejected");
+  return { title: sharedAsset.proposal_title, status: "Rejected" };
+};

@@ -38,3 +38,28 @@ export const viewPublicProposal = async (req, res) => {
     return res.status(500).json({ success: false, message: "Internal server error fetching asset profile payload" });
   }
 };
+export const acceptProposalHandler = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const data = await shareService.acceptPublicProposal(token);
+    return res.status(200).json({ success: true, message: "Proposal accepted successfully", data });
+  } catch (error) {
+    console.error("Public accept error:", error);
+    if (error.message === "Invalid access token specifier") return res.status(404).json({ success: false, message: error.message });
+    if (error.message === "This secure proposal link has expired") return res.status(410).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: "Internal server error updating proposal state" });
+  }
+};
+
+export const rejectProposalHandler = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const data = await shareService.rejectPublicProposal(token);
+    return res.status(200).json({ success: true, message: "Proposal rejected successfully", data });
+  } catch (error) {
+    console.error("Public reject error:", error);
+    if (error.message === "Invalid access token specifier") return res.status(404).json({ success: false, message: error.message });
+    if (error.message === "This secure proposal link has expired") return res.status(410).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: "Internal server error updating proposal state" });
+  }
+};

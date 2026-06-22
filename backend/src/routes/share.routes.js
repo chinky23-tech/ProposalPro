@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { createLinkAndSendEmail, viewPublicProposal } from "../controllers/share.controller.js";
+import { 
+  createLinkAndSendEmail, 
+  viewPublicProposal, 
+  acceptProposalHandler, 
+  rejectProposalHandler 
+} from "../controllers/share.controller.js";
+import { validatePublicToken } from "../validations/share.validation.js";
 import protect from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -124,5 +130,49 @@ router.post("/proposals/:proposalId/share", protect, createLinkAndSendEmail);
  *         description: Internal server error gathering infrastructure mapping metadata.
  */
 router.get("/public/proposals/share/:token", viewPublicProposal);
+
+/**
+ * @openapi
+ * /api/public/proposals/share/{token}/accept:
+ *   patch:
+ *     summary: Publicly accept a proposal using its secure tracking token
+ *     tags: [Proposal Sharing]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Proposal status successfully advanced to 'Accepted'.
+ *       '400':
+ *         description: Invalid token parameters.
+ *       '404':
+ *         description: Token not found.
+ */
+router.patch("/public/proposals/share/:token/accept", validatePublicToken, acceptProposalHandler);
+
+/**
+ * @openapi
+ * /api/public/proposals/share/{token}/reject:
+ *   patch:
+ *     summary: Publicly decline or request changes on a proposal using its secure tracking token
+ *     tags: [Proposal Sharing]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Proposal status successfully advanced to 'Rejected'.
+ *       '400':
+ *         description: Invalid token parameters.
+ *       '404':
+ *         description: Token not found.
+ */
+router.patch("/public/proposals/share/:token/reject", validatePublicToken, rejectProposalHandler);
 
 export default router;

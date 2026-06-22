@@ -44,3 +44,18 @@ export const validateCreateShare = (req, res, next) => {
 
   next();
 };
+/**
+ * Validates that the public token parameter format is safe
+ */
+export const validatePublicToken = (req, res, next) => {
+  const { token } = req.params;
+  const tokenRegex = /^[a-fA-F0-9]+$/; // Hexadecimal validation for crypto.randomBytes tokens
+
+  if (!token || !tokenRegex.test(token)) {
+    return res.status(400).json({
+      success: false,
+      message: "Validation Error: Request contains an invalid token structural format."
+    });
+  }
+  next();
+};
