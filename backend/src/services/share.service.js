@@ -2,26 +2,23 @@ import * as shareRepository from "../repositories/share.repository.js";
 import crypto from "crypto";
 import { Resend } from "resend";
 
-// Initialize Resend with your environment variable
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const generateProposalShare = async ({ proposalId, clientEmail, durationDays = 30 }) => {
-  // 1. Generate a secure, unguessable URL-safe random string token
   const token = crypto.randomBytes(16).toString("hex");
   
-  // 2. Set lifetime limit constraints
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + durationDays);
 
-  // 3. Persist record inside PostgreSQL
   const shareRecord = await shareRepository.createShare({ proposalId, token, expiresAt });
 
-  // 4. Construct Public-facing web link wrapper
+  // 🟢 AUTOMATION TRIGGER 1: Advance state from Draft/Review to Sent
+  await shareRepository.updateProposalStatus(proposalId, "Sent");
+
   const shareUrl = `https://proposalpro.ai/p/${token}`;
 
-  // 5. Fire transaction dispatch payload using Resend
   await resend.emails.send({
-    from: "ProposalPro <proposals@resend.dev>", // Resend sandbox fallback address
+    from: "ProposalPro <proposals@resend.dev>",
     to: clientEmail,
     subject: "You have received a new business proposal!",
     html: `
@@ -44,13 +41,16 @@ export const getPublicProposalByToken = async (token) => {
   const sharedAsset = await shareRepository.findByToken(token);
   if (!sharedAsset) throw new Error("Invalid access token specifier");
 
-  // Check if link lifetime limit threshold has been surpassed
   if (new Date() > new Date(sharedAsset.expires_at)) {
     throw new Error("This secure proposal link has expired");
   }
 
-  // Analytics increment check
   await shareRepository.incrementViewCount(token);
+
+  // 🟢 AUTOMATION TRIGGER 2: Only update to 'Viewed' if it was sitting at 'Sent'
+  if (sharedAsset.status === "Sent") {
+    await shareRepository.updateProposalStatus(sharedAsset.proposal_id, "Viewed");
+  }
 
   return {
     title: sharedAsset.proposal_title,
