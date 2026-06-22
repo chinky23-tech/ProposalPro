@@ -5,6 +5,7 @@ import {
   updateProposal,
   deleteProposal,
   proposalExists,
+  updateProposalStatusAdmin
 } from "../repositories/proposal.repository.js";
 
 export const createProposalService = async (proposalData) => {
@@ -55,4 +56,28 @@ export const updateProposalService = async ({
 
 export const deleteProposalService = async (proposalId, userId) => {
   return await deleteProposal(proposalId, userId);
+};
+
+
+
+/**
+ * Closes out a sales cycle as a win
+ */
+export const markProposalAsWon = async (proposalId, userId) => {
+  const updatedProposal = await updateProposalStatusAdmin(proposalId, "Won", userId);
+  if (!updatedProposal) {
+    throw new Error("Proposal not found or unauthorized access to resource context.");
+  }
+  return updatedProposal;
+};
+
+/**
+ * Closes out a sales cycle as a loss
+ */
+export const markProposalAsLost = async (proposalId, userId) => {
+  const updatedProposal = await updateProposalStatusAdmin(proposalId, "Lost", userId);
+  if (!updatedProposal) {
+    throw new Error("Proposal not found or unauthorized access to resource context.");
+  }
+  return updatedProposal;
 };

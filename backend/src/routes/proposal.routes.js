@@ -1,12 +1,14 @@
 import { Router } from "express";
 import protect from "../middleware/auth.middleware.js";
-
+import { validateProposalIdParam } from "../validations/proposal.validation.js";
 import {
   createProposal,
   getProposals,
   getProposalById,
   updateProposal,
   deleteProposal,
+  handleMarkAsWon, 
+  handleMarkAsLost
 } from "../controllers/proposal.controller.js";
 
 const router = Router();
@@ -158,9 +160,52 @@ router.route("/")
  *       401:
  *         description: Unauthorized access
  */
-  router.route("/:id")
+router.route("/:id")
   .get(getProposalById)
   .put(updateProposal)
   .delete(deleteProposal);
 
+/**
+ * @openapi
+ * /api/proposals/{id}/won:
+ *   patch:
+ *     summary: Administratively close a proposal deal cycle as WON
+ *     tags: [Proposals]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Proposal milestone advanced to 'Won'.
+ *       '404':
+ *         description: Proposal not found or resource mismatch.
+ */
+router.patch("/:id/won", protect, validateProposalIdParam, handleMarkAsWon);
+
+/**
+ * @openapi
+ * /api/proposals/{id}/lost:
+ *   patch:
+ *     summary: Administratively close a proposal deal cycle as LOST
+ *     tags: [Proposals]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Proposal milestone advanced to 'Lost'.
+ *       '404':
+ *         description: Proposal not found or resource mismatch.
+ */
+router.patch("/:id/lost", protect, validateProposalIdParam, handleMarkAsLost);
 export default router;

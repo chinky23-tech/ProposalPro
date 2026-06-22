@@ -109,3 +109,18 @@ export const validateUpdateProposal = ({
         : undefined,
   };
 };
+/**
+ * Ensures the target parameter path contains a valid record ID format
+ */
+export const validateProposalIdParam = (req, res, next) => {
+  const { id } = req.params;
+  const safeIdRegex = /^[a-zA-Z0-9-]+$/;
+
+  if (!id || !safeIdRegex.test(id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Validation Error: Target proposal identifier format is invalid."
+    });
+  }
+  next();
+};
