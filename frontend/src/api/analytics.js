@@ -2,7 +2,7 @@ import { request } from "./auth";
 
 export const analyticsApi = {
   getAnalytics: (token) =>
-    request("/proposals/analytics", {
+    request("/analytics", {
       token,
     }),
 };
