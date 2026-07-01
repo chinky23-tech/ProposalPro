@@ -2,7 +2,7 @@ import { request } from "./auth";
 
 export const clientsApi = {
   getClients: (token) =>
-    request("/proposals/clients", {
+    request("/clients", {
       token,
     }),
 };

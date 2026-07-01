@@ -1,92 +1,166 @@
-import { useEffect, useMemo, useState } from "react";
-import proposalsApi from "../../../api/proposals";
-import ErrorBar from "../../../components/dashboard/ErrorBar";
-import ProposalList from "../../../components/dashboard/ProposalList";
-import StatsGrid from "../../../components/dashboard/StatsGrid";
-import { formatCurrency } from "../../../utils/formatters";
+import KpiCard from "../../dashboard/KpiCard";
+import { useDashboard } from "../../../hooks/useDashboard";
 
-const Overview = ({ token, refreshKey, onEditProposal }) => {
-  const [proposals, setProposals] = useState([]);
-  const [loading, setLoading] = useState(Boolean(token));
-  const [error, setError] = useState("");
+export default function Overview() {
+  const {
+    loading,
+    error,
+    analytics,
+    proposals,
+    clients,
+  } = useDashboard();
 
-  useEffect(() => {
-    let isCurrent = true;
-
-    const loadProposals = async () => {
-      try {
-        const data = await proposalsApi.getProposals(token);
-
-        if (!isCurrent) {
-          return;
-        }
-
-        setProposals(Array.isArray(data) ? data : []);
-        setError("");
-      } catch (err) {
-        if (isCurrent) {
-          setError(err.message || "Failed to load proposals.");
-        }
-      } finally {
-        if (isCurrent) {
-          setLoading(false);
-        }
-      }
-    };
-
-    if (token) {
-      loadProposals();
-    }
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [token, refreshKey]);
-
-  const stats = useMemo(() => {
-    const totalValue = proposals.reduce(
-      (total, proposal) => total + (Number.parseFloat(proposal.value) || 0),
-      0
+  if (loading) {
+    return (
+      <div className="text-white">
+        Loading dashboard...
+      </div>
     );
-    const totalScore = proposals.reduce(
-      (total, proposal) => total + (Number.parseInt(proposal.score, 10) || 0),
-      0
-    );
-    const averageScore =
-      proposals.length > 0 ? Math.round(totalScore / proposals.length) : 0;
+  }
 
-    return [
-      {
-        label: "Total proposals",
-        value: String(proposals.length),
-        detail: "From your database",
-      },
-      {
-        label: "Pipeline value",
-        value: formatCurrency(totalValue),
-        detail: "Open proposal value",
-      },
-      {
-        label: "Win-ready score",
-        value: `${averageScore}%`,
-        detail: "Across active proposals",
-      },
-    ];
-  }, [proposals]);
+  if (error) {
+    return (
+      <div className="text-red-400">
+        {error}
+      </div>
+    );
+  }
 
   return (
-    <>
-      <ErrorBar message={error} onDismiss={() => setError("")} />
-      <StatsGrid stats={stats} label="Proposal metrics" />
-      <section className="single-view">
-        <ProposalList
-          proposals={proposals}
-          isLoading={loading}
-          onEditProposal={onEditProposal}
-        />
-      </section>
-    </>
-  );
-};
+    <div className="space-y-6">
+      {/* KPI CARDS */}
 
-export default Overview;
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <KpiCard
+          title="Total Proposals"
+          value={
+            analytics?.total_proposals || 0
+          }
+        />
+
+        <KpiCard
+          title="Pipeline Value"
+          value={`₹${analytics?.total_value || 0}`}
+        />
+
+        <KpiCard
+          title="Average Score"
+          value={
+            analytics?.average_score || 0
+          }
+        />
+
+        <KpiCard
+          title="Win Rate"
+          value={`${analytics?.win_rate || 0}%`}
+        />
+      </div>
+
+      {/* STATUS CARDS */}
+
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+        <KpiCard
+          title="Draft"
+          value={
+            analytics?.draft_count || 0
+          }
+        />
+
+        <KpiCard
+          title="Review"
+          value={
+            analytics?.review_count || 0
+          }
+        />
+
+        <KpiCard
+          title="Sent"
+          value={
+            analytics?.sent_count || 0
+          }
+        />
+
+        <KpiCard
+          title="Viewed"
+          value={
+            analytics?.viewed_count || 0
+          }
+        />
+
+        <KpiCard
+          title="Accepted"
+          value={
+            analytics?.accepted_count || 0
+          }
+        />
+       
+       <KpiCard
+          title="Rejected"
+          value={
+            analytics?.rejected_count || 0
+          }
+        />
+        <KpiCard
+          title="Won"
+          value={
+            analytics?.won_count || 0
+          }
+        />
+      </div>
+
+      {/* RECENT PROPOSALS */}
+
+      <div className="rounded-2xl border border-emerald-900/20 bg-slate-900 p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">
+          Recent Proposals
+        </h2>
+
+        <div className="space-y-3">
+          {proposals
+            .slice(0, 5)
+            .map((proposal) => (
+              <div
+                key={proposal.id}
+                className="flex justify-between border-b border-slate-800 pb-2"
+              >
+                <span className="text-white">
+                  {proposal.title}
+                </span>
+
+                <span className="text-emerald-400">
+                  {proposal.status}
+                </span>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {/* RECENT CLIENTS */}
+
+      <div className="rounded-2xl border border-emerald-900/20 bg-slate-900 p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">
+          Recent Clients
+        </h2>
+
+        <div className="space-y-3">
+          {clients
+            .slice(0, 5)
+            .map((client) => (
+              <div
+                key={client.id}
+                className="flex justify-between border-b border-slate-800 pb-2"
+              >
+                <span className="text-white">
+                  {client.name}
+                </span>
+
+                <span className="text-slate-400">
+                  {client.email}
+                </span>
+              </div>
+            ))}
+        </div>
+      </div>
+    </div>
+  );
+}

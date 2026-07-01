@@ -1,94 +1,84 @@
-import { useState } from "react";
-import DashboardHeader from "../../components/dashboard/DashboardHeader";
-import ProposalModal from "../../components/dashboard/ProposalModal";
-import Sidebar from "../../components/dashboard/Sidebar";
-import AiBuilder from "./views/AiBuilder";
-import Analytics from "./views/Analytics";
-import Clients from "./views/Clients";
+import { Routes, Route, Navigate } from "react-router-dom";
+
+import DashboardLayout from "../../components/layout/DashboardLayout";
+
 import Overview from "./views/Overview";
+import AIBuilder from "./views/AIBuilder";
 import Proposals from "./views/Proposals";
+import Templates from "./views/Templates";
+import Packages from "./views/Packages";
+import Documents from "./views/Documents";
+import Clients from "./views/Clients";
+import Analytics from "./views/Analytics";
+import Team from "./views/Team";
+import Billing from "./views/Billing";
+import Settings from "./views/Settings";
 
-const Dashboard = ({ user, token, onSignOut }) => {
-  const [activeSection, setActiveSection] = useState("Overview");
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingProposal, setEditingProposal] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+export default function Dashboard() {
+return ( <DashboardLayout> <Routes>
+<Route
+index
+element={<Overview />}
+/>
 
-  const refreshDashboardData = () => {
-    setRefreshKey((current) => current + 1);
-  };
 
-  const renderSection = () => {
-    if (activeSection === "AI Builder") {
-      return <AiBuilder token={token} />;
-    }
+    <Route
+      path="ai-builder"
+      element={<AIBuilder />}
+    />
 
-    if (activeSection === "Proposals") {
-      return (
-        <Proposals
-          token={token}
-          refreshKey={refreshKey}
-          onEditProposal={setEditingProposal}
-        />
-      );
-    }
+    <Route
+      path="proposals"
+      element={<Proposals />}
+    />
 
-    if (activeSection === "Clients") {
-      return <Clients token={token} refreshKey={refreshKey} />;
-    }
+    <Route
+      path="templates"
+      element={<Templates />}
+    />
 
-    if (activeSection === "Analytics") {
-      return <Analytics token={token} refreshKey={refreshKey} />;
-    }
+    <Route
+      path="packages"
+      element={<Packages />}
+    />
 
-    return (
-      <Overview
-        token={token}
-        refreshKey={refreshKey}
-        onEditProposal={setEditingProposal}
-      />
-    );
-  };
+    <Route
+      path="documents"
+      element={<Documents />}
+    />
 
-  return (
-    <main className="dashboard-shell">
-      <Sidebar
-        user={user}
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        onSignOut={onSignOut}
-      />
+    <Route
+      path="clients"
+      element={<Clients />}
+    />
 
-      <section className="dashboard-main">
-        <DashboardHeader
-          activeSection={activeSection}
-          user={user}
-          onNewProposal={() => setIsCreateOpen(true)}
-        />
+    <Route
+      path="analytics"
+      element={<Analytics />}
+    />
 
-        {renderSection()}
-      </section>
+    <Route
+      path="team"
+      element={<Team />}
+    />
 
-      {isCreateOpen && (
-        <ProposalModal
-          key="create-proposal"
-          token={token}
-          onClose={() => setIsCreateOpen(false)}
-          onSaved={refreshDashboardData}
-        />
-      )}
+    <Route
+      path="billing"
+      element={<Billing />}
+    />
 
-      {editingProposal && (
-        <ProposalModal
-          key={`edit-proposal-${editingProposal.id}`}
-          proposal={editingProposal}
-          token={token}
-          onClose={() => setEditingProposal(null)}
-          onSaved={refreshDashboardData}
-        />
-      )}
-    </main>
-  );
-};
+    <Route
+      path="settings"
+      element={<Settings />}
+    />
 
-export default Dashboard;
+    <Route
+      path="*"
+      element={<Navigate to="/dashboard" replace />}
+    />
+  </Routes>
+</DashboardLayout>
+
+
+);
+}
