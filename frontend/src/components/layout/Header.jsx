@@ -29,8 +29,8 @@ const handleLogout = () => {
 
 const pageTitleMap = {
 "/dashboard": "Dashboard",
-"/dashboard/ai-builder":
-"AI Builder",
+"/dashboard/proposal-studio":
+"Proposal Studio",
 "/dashboard/proposals":
 "Proposals",
 "/dashboard/templates":

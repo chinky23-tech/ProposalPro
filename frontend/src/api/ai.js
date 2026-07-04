@@ -2,21 +2,21 @@ import { request } from "./auth";
 
 export const aiApi = {
   generateDraft: ({ brief }, token) =>
-    request("/proposals/ai/draft", {
+    request("/ai/draft", {
       method: "POST",
       body: { brief },
       token,
     }),
 
   improveWinScore: ({ brief, currentScore }, token) =>
-    request("/proposals/ai/improve-score", {
+    request("/ai/improve-score", {
       method: "POST",
       body: { brief, currentScore },
       token,
     }),
 
   applySuggestion: ({ brief, suggestion }, token) =>
-    request("/proposals/ai/apply-suggestion", {
+    request("/ai/apply-suggestion", {
       method: "POST",
       body: { brief, suggestion },
       token,

@@ -32,9 +32,9 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    name: "AI Builder",
-    path: "/dashboard/ai-builder",
-    icon: Sparkles,
+  name: "Proposal Studio",
+  path: "/dashboard/proposal-studio",
+  icon: Sparkles,
   },
   {
     name: "Proposals",

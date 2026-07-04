@@ -30,5 +30,18 @@ export const proposalsApi = {
       method: "DELETE",
       token,
     }),
+
+  markWon: (id, token) =>
+    request(`/proposals/${id}/won`, {
+      method: "PATCH",
+      token,
+    }),
+
+  markLost: (id, token) =>
+    request(`/proposals/${id}/lost`, {
+      method: "PATCH",
+      token,
+    }),
 };
+
 export default proposalsApi;

@@ -23,7 +23,7 @@ element={<Overview />}
 
 
     <Route
-      path="ai-builder"
+      path="proposal-studio"
       element={<AIBuilder />}
     />
 
