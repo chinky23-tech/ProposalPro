@@ -66,7 +66,7 @@ pageTitleMap[location.pathname] ||
 "ProposalPro AI";
 
 return ( 
-<header className="sticky top-0 z-50 h-16 bg-slate-950/80 backdrop-blur-md border-b border-emerald-900/20 flex items-center justify-between px-6 flex-shrink-0">
+<header className="sticky top-0 z-50 h-16 bg-slate-950/80 backdrop-blur-md border-b border-emerald-900/20 flex items-center justify-between px-6 shrink-0">
 <div> 
   <h1 className="text-xl font-bold text-white">
 {pageTitle} </h1> </div>
@@ -106,7 +106,7 @@ return (
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-56 rounded-xl border border-emerald-900/20 bg-slate-900 shadow-xl z-[9999]">
+        <div className="absolute right-0 mt-2 w-56 rounded-xl border border-emerald-900/20 bg-slate-900 shadow-xl z-9999">
           <button className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-white/5">
             <User className="w-4 h-4" />
             Profile
