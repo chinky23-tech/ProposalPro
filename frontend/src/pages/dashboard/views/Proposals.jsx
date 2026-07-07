@@ -3,12 +3,17 @@ import { useMemo, useState } from "react";
 import { useProposals } from "../../../hooks/useProposals";
 
 import ProposalToolbar from "../../../components/proposals/ProposalToolbar";
+import ProposalTable from "../../../components/proposals/ProposalTable";
+import ProposalModal from "../../../components/proposals/ProposalModal";
+import proposalsApi from "../../../api/proposals";
+import { getStoredAuthSession } from "../../../api/auth";
+import { toast } from "react-toastify";
 
 export default function Proposals() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
 
-  const [showCreateModal, setShowCreateModal] =
+  const [showModal, setShowModal] =
     useState(false);
 
   const [selectedProposal, setSelectedProposal] =
@@ -18,7 +23,19 @@ export default function Proposals() {
     proposals,
     loading,
     error,
+    refresh,
   } = useProposals();
+
+
+  const getToken = () => {
+  const session =
+    getStoredAuthSession();
+
+  return (
+    session?.accessToken ||
+    session?.token
+  );
+};
 
   const filteredProposals = useMemo(() => {
     return proposals.filter((proposal) => {
@@ -43,40 +60,108 @@ export default function Proposals() {
 
   const handleCreate = () => {
     setSelectedProposal(null);
-    setShowCreateModal(true);
+    setShowModal(true);
   };
 
   const handleEdit = (proposal) => {
     setSelectedProposal(proposal);
-    setShowCreateModal(true);
+    setShowModal(true);
   };
 
-  const handleDelete = (proposal) => {
-    console.log(
-      "Delete Proposal:",
-      proposal.id
+  const handleDelete = async (
+  proposal
+) => {
+  const confirmed =
+    window.confirm(
+      `Delete "${proposal.title}"?`
     );
 
-    // connect delete api later
-  };
+  if (!confirmed) return;
 
-  const handleMarkWon = (proposal) => {
-    console.log(
-      "Mark Won:",
-      proposal.id
+  try {
+    await proposalsApi.deleteProposal(
+      proposal.id,
+      getToken()
     );
 
-    // connect api later
-  };
-
-  const handleMarkLost = (proposal) => {
-    console.log(
-      "Mark Lost:",
-      proposal.id
+    toast.success(
+      "Proposal deleted"
     );
 
-    // connect api later
-  };
+    await refresh();
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
+
+
+
+const handleWon = async (
+  proposal
+) => {
+  try {
+    await proposalsApi.markWon(
+      proposal.id,
+      getToken()
+    );
+
+    toast.success(
+      "Proposal marked as Won"
+    );
+
+    await refresh();
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
+
+  const handleLost = async (
+  proposal
+) => {
+  try {
+    await proposalsApi.markLost(
+      proposal.id,
+      getToken()
+    );
+
+    toast.success(
+      "Proposal marked as Lost"
+    );
+
+    await refresh();
+  } catch (error) {
+    toast.error(error.message);
+  }
+};
+
+const handleModalSubmit = async (formData) => {
+  try {
+    if (selectedProposal) {
+      await proposalsApi.updateProposal(
+        selectedProposal.id,
+        formData,
+        getToken()
+      );
+
+      toast.success("Proposal updated successfully");
+    } else {
+      await proposalsApi.createProposal(
+        formData,
+        getToken()
+      );
+
+      toast.success("Proposal created successfully");
+    }
+
+    await refresh();
+
+    setShowModal(false);
+    setSelectedProposal(null);
+  } catch (error) {
+    console.error(error);
+    toast.error(error.message || "Something went wrong");
+  }
+};
 
   if (loading) {
     return (
@@ -103,9 +188,10 @@ export default function Proposals() {
           Proposals
         </h1>
 
-        <p className="text-slate-400 mt-1">
-          Manage your proposals and
-          deal pipeline.
+        <p className="mt-1 text-slate-400">
+          Manage your proposal
+          pipeline and track
+          deal progress.
         </p>
       </div>
 
@@ -121,151 +207,25 @@ export default function Proposals() {
 
       {/* Table */}
 
-      <div className="overflow-hidden rounded-2xl border border-emerald-900/20 bg-slate-900">
-        <table className="w-full">
-          <thead className="bg-slate-950">
-            <tr>
-              <th className="p-4 text-left text-slate-400">
-                Client
-              </th>
+      <ProposalTable
+        proposals={filteredProposals}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onWon={handleWon}
+        onLost={handleLost}
+      />
 
-              <th className="p-4 text-left text-slate-400">
-                Title
-              </th>
+      {/* Modal */}
 
-              <th className="p-4 text-left text-slate-400">
-                Value
-              </th>
-
-              <th className="p-4 text-left text-slate-400">
-                Score
-              </th>
-
-              <th className="p-4 text-left text-slate-400">
-                Status
-              </th>
-
-              <th className="p-4 text-left text-slate-400">
-                Actions
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredProposals.length === 0 ? (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="p-10 text-center text-slate-500"
-                >
-                  No proposals found
-                </td>
-              </tr>
-            ) : (
-              filteredProposals.map(
-                (proposal) => (
-                  <tr
-                    key={proposal.id}
-                    className="border-t border-slate-800"
-                  >
-                    <td className="p-4 text-white">
-                      {proposal.client}
-                    </td>
-
-                    <td className="p-4 text-white">
-                      {proposal.title}
-                    </td>
-
-                    <td className="p-4 text-white">
-                      ₹
-                      {Number(
-                        proposal.value
-                      ).toLocaleString()}
-                    </td>
-
-                    <td className="p-4 text-emerald-400 font-semibold">
-                      {proposal.score}
-                    </td>
-
-                    <td className="p-4">
-                      <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
-                        {proposal.status}
-                      </span>
-                    </td>
-
-                    <td className="p-4">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={() =>
-                            handleEdit(
-                              proposal
-                            )
-                          }
-                          className="rounded-lg bg-blue-500/10 px-3 py-1 text-xs text-blue-400 hover:bg-blue-500/20"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            handleDelete(
-                              proposal
-                            )
-                          }
-                          className="rounded-lg bg-red-500/10 px-3 py-1 text-xs text-red-400 hover:bg-red-500/20"
-                        >
-                          Delete
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            handleMarkWon(
-                              proposal
-                            )
-                          }
-                          className="rounded-lg bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400 hover:bg-emerald-500/20"
-                        >
-                          Won
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            handleMarkLost(
-                              proposal
-                            )
-                          }
-                          className="rounded-lg bg-orange-500/10 px-3 py-1 text-xs text-orange-400 hover:bg-orange-500/20"
-                        >
-                          Lost
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              )
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Future Modal */}
-
-      {showCreateModal && (
-        <div className="rounded-xl border border-emerald-900/20 bg-slate-900 p-6 text-white">
-          {selectedProposal
-            ? `Editing: ${selectedProposal.title}`
-            : "Create Proposal Modal"}
-
-          <button
-            onClick={() =>
-              setShowCreateModal(false)
-            }
-            className="ml-4 rounded-lg bg-red-500 px-3 py-1 text-sm"
-          >
-            Close
-          </button>
-        </div>
-      )}
+      <ProposalModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setSelectedProposal(null);
+        }}
+        proposal={selectedProposal}
+        onSubmit={handleModalSubmit}
+      />
     </div>
   );
 }

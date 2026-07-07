@@ -1,5 +1,7 @@
 import { Search, Plus } from "lucide-react";
-
+import Select from "../ui/Select";
+import Input from "../ui/Input";
+import Button from "../ui/Button";
 export default function ProposalToolbar({
   search,
   setSearch,
@@ -28,41 +30,43 @@ export default function ProposalToolbar({
         </div>
 
         {/* Status Filter */}
-        <select
-          value={status}
-          onChange={(e) =>
-            setStatus(e.target.value)
-          }
-          className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-emerald-500"
-        >
-          <option value="All">
-            All Statuses
-          </option>
-
-          <option value="Draft">
-            Draft
-          </option>
-
-          <option value="Review">
-            Review
-          </option>
-
-          <option value="Sent">
-            Sent
-          </option>
-
-          <option value="Viewed">
-            Viewed
-          </option>
-
-          <option value="Won">
-            Won
-          </option>
-
-          <option value="Lost">
-            Lost
-          </option>
-        </select>
+      <Select
+  value={status}
+  onChange={(e) =>
+    setStatus(e.target.value)
+  }
+  options={[
+    {
+      value: "All",
+      label: "All Statuses",
+    },
+    {
+      value: "Draft",
+      label: "Draft",
+    },
+    {
+      value: "Review",
+      label: "Review",
+    },
+    {
+      value: "Sent",
+      label: "Sent",
+    },
+    {
+      value: "Viewed",
+      label: "Viewed",
+    },
+    {
+      value: "Won",
+      label: "Won",
+    },
+    {
+      value: "Lost",
+      label: "Lost",
+    },
+  ]}
+/>
+      
       </div>
 
       {/* Create Button */}
