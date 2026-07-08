@@ -24,7 +24,7 @@ export const Button = ({
       "bg-slate-800 hover:bg-slate-700 text-white border border-slate-700",
 
     outline:
-      "border border-slate-700 bg-transparent hover:bg-slate-800 text-slate-200",
+      "border border-slate-300 bg-transparent hover:bg-emerald-200/50 text-slate-800",
 
     danger:
       "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-900/20",
