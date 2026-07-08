@@ -17,7 +17,7 @@ export const Input = React.forwardRef(
         className={`w-full flex flex-col gap-1.5 ${className}`}
       >
         {label && (
-          <label className="text-sm font-medium text-slate-300">
+          <label className="text-sm font-medium text-slate-800">
             {label}
           </label>
         )}
@@ -32,9 +32,9 @@ export const Input = React.forwardRef(
             py-2.5
             text-sm
             rounded-xl
-            bg-slate-900
-            text-white
-            placeholder:text-slate-500
+            bg-white
+            text-black
+            placeholder:text-slate-800
             border
             transition-all
             focus:outline-none
@@ -42,7 +42,7 @@ export const Input = React.forwardRef(
             ${
               error
                 ? "border-red-500 focus:ring-red-500/20 focus:border-red-500"
-                : "border-slate-700 focus:border-emerald-500 focus:ring-emerald-500/20"
+                : "border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20"
             }
           `}
           {...props}

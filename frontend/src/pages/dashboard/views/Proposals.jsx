@@ -5,6 +5,8 @@ import { useProposals } from "../../../hooks/useProposals";
 import ProposalToolbar from "../../../components/proposals/ProposalToolbar";
 import ProposalTable from "../../../components/proposals/ProposalTable";
 import ProposalModal from "../../../components/proposals/ProposalModal";
+import ProposalStatus from "../../../components/proposals/ProposalStatusBadge";
+
 import proposalsApi from "../../../api/proposals";
 import { getStoredAuthSession } from "../../../api/auth";
 import { toast } from "react-toastify";
