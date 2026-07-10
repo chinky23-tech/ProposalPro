@@ -32,6 +32,7 @@ export default function ProposalToolbar({
         {/* Status Filter */}
       <Select
   value={status}
+  variant="dark"
   onChange={(e) =>
     setStatus(e.target.value)
   }

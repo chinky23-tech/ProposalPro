@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-// Import the Lucide icons here
 import { ChevronDown, Check } from "lucide-react";
 
 export const Select = React.forwardRef(
@@ -12,6 +11,7 @@ export const Select = React.forwardRef(
       placeholder = "Select an option",
       value,
       onChange,
+      variant = "dark", 
       ...props
     },
     ref
@@ -19,8 +19,10 @@ export const Select = React.forwardRef(
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
 
-    const selectedOption = options.find((opt) => opt.value === value);
-
+   // 1. Make the lookup case-insensitive or string-safe just in case
+const selectedOption = options.find(
+  (opt) => String(opt.value).trim() === String(value).trim()
+);
     useEffect(() => {
       const handleClickOutside = (event) => {
         if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -32,11 +34,19 @@ export const Select = React.forwardRef(
     }, []);
 
     const handleOptionClick = (optionValue) => {
-      if (onChange) {
-        onChange({ target: { value: optionValue } });
-      }
-      setIsOpen(false);
-    };
+  if (onChange) {
+    // Pass BOTH name and value back so e.target.name works flawlessly!
+    onChange({ 
+      target: { 
+        name: props.name, 
+        value: optionValue 
+      } 
+    });
+  }
+  setIsOpen(false);
+};
+
+    const isDark = variant === "dark";
 
     return (
       <div
@@ -44,7 +54,7 @@ export const Select = React.forwardRef(
         className={`w-full flex flex-col gap-1.5 relative ${className}`}
       >
         {label && (
-          <label className="text-sm font-medium text-slate-800">
+          <label className={`text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-700"}`}>
             {label}
           </label>
         )}
@@ -63,24 +73,23 @@ export const Select = React.forwardRef(
               py-2.5
               text-sm
               rounded-xl
-              bg-white
               transition-all
               border
               text-left
               focus:outline-none
               focus:ring-2
               ${
-                error
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 text-slate-900"
-                  : "border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20 text-slate-900"
+                isDark 
+                  ? "bg-slate-900 border-slate-800 text-white focus:border-emerald-500 focus:ring-emerald-500/20" 
+                  : "bg-white border-slate-200 text-slate-900 focus:border-emerald-500 focus:ring-emerald-500/20"
               }
-              ${!selectedOption ? "text-slate-400" : ""}
+              ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}
+              ${!selectedOption && isDark ? "text-slate-400" : ""}
+              ${!selectedOption && !isDark ? "text-slate-500" : ""}
             `}
             {...props}
           >
             <span>{selectedOption ? selectedOption.label : placeholder}</span>
-            
-            {/* Cleaner Chevron icon using Lucide */}
             <ChevronDown 
               className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
                 isOpen ? "transform rotate-180" : ""
@@ -89,18 +98,31 @@ export const Select = React.forwardRef(
           </button>
 
           {isOpen && (
-            <ul className="absolute z-50 w-full mt-1.5 max-h-60 overflow-auto bg-white border border-slate-200 rounded-xl shadow-lg py-1 focus:outline-none">
+            <ul 
+              className={`
+                absolute z-9999 w-full max-h-48 overflow-auto 
+                rounded-xl shadow-xl py-1 focus:outline-none border
+                ${
+                  isDark 
+                    ? "bg-slate-900 border-slate-800 text-slate-200 top-full mt-1.5" 
+                    : "bg-white border-slate-200 text-slate-800 bottom-full mb-1.5" // <-- Forces it UPWARDS inside the light modal form
+                }
+              `}
+            >
               {placeholder && (
                 <li
                   onClick={() => handleOptionClick("")}
-                  className="px-4 py-2 text-sm text-slate-400 hover:bg-slate-50 cursor-pointer transition-colors"
+                  className={`px-4 py-2 text-sm cursor-pointer transition-colors ${
+                    isDark ? "text-slate-400 hover:bg-slate-800" : "text-slate-400 hover:bg-slate-50"
+                  }`}
                 >
                   {placeholder}
                 </li>
               )}
               
               {options.map((option) => {
-                const isSelected = option.value === value;
+                // 2. Update this line inside the map loop
+const isSelected = String(option.value).trim() === String(value).trim();
                 return (
                   <li
                     key={option.value}
@@ -116,16 +138,14 @@ export const Select = React.forwardRef(
                       justify-between
                       ${
                         isSelected
-                          ? "bg-emerald-50 text-emerald-700 font-medium"
-                          : "text-slate-700 hover:bg-slate-50"
+                          ? "bg-emerald-50 text-emerald-700 font-medium" // <-- Changed from blue to Emerald
+                          : isDark ? "text-slate-200 hover:bg-slate-800" : "text-slate-800 hover:bg-slate-50"
                       }
                     `}
                   >
                     <span>{option.label}</span>
-                    
-                    {/* Cleaner Check icon using Lucide */}
                     {isSelected && (
-                      <Check className="w-4 h-4 text-emerald-600" />
+                      <Check className="w-4 h-4 text-emerald-600" /> // <-- Changed icon to Emerald
                     )}
                   </li>
                 );
@@ -143,7 +163,5 @@ export const Select = React.forwardRef(
     );
   }
 );
-
-Select.displayName = "Select";
-
 export default Select;
+Select.displayName = "Select";
