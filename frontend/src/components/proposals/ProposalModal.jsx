@@ -169,7 +169,7 @@ export default function ProposalModal({
               Proposal Health Score
             </label>
             
-            <div className="flex items-center gap-4 h-[54px] px-4 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center gap-4 h-54px px-4 rounded-xl bg-slate-50 border border-slate-200">
               {/* Radial Progress Graphic */}
               <div className="relative flex items-center justify-center w-11 h-11 shrink-0">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 44 44">
