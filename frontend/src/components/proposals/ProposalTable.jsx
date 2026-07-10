@@ -1,3 +1,4 @@
+import { Award } from "lucide-react";
 import ProposalStatusBadge from "./ProposalStatusBadge";
 
 export default function ProposalTable({
@@ -50,98 +51,123 @@ export default function ProposalTable({
                 </td>
               </tr>
             ) : (
-              proposals.map((proposal) => (
-                <tr
-                  key={proposal.id}
-                  className="border-t border-slate-800 hover:bg-slate-800/30 transition-colors"
-                >
-                  <td className="p-4 text-white">
-                    {proposal.client}
-                  </td>
+              proposals.map((proposal) => {
+                // 🛠️ Circular calculations per row element
+                const scoreNum = Math.min(Math.max(Number(proposal.score || 0), 0), 100);
+                const radius = 12; // Adjusted slightly for side-by-side layout balance
+                const circumference = 2 * Math.PI * radius;
+                const strokeOffset = circumference - (scoreNum / 100) * circumference;
 
-                  <td className="p-4">
-                    <div>
-                      <p className="font-medium text-white">
-                        {proposal.title}
-                      </p>
+                return (
+                  <tr
+                    key={proposal.id}
+                    className="border-t border-slate-800 hover:bg-slate-800/30 transition-colors"
+                  >
+                    <td className="p-4 text-white font-medium">
+                      {proposal.client}
+                    </td>
 
-                      <p className="text-xs text-slate-400">
-                        ID #{proposal.id}
-                      </p>
-                    </div>
-                  </td>
+                    <td className="p-4">
+                      <div>
+                        <p className="font-medium text-white">
+                          {proposal.title}
+                        </p>
 
-                  <td className="p-4 text-white">
-                    ₹
-                    {Number(
-                      proposal.value
-                    ).toLocaleString()}
-                  </td>
+                        <p className="text-xs text-slate-400">
+                          ID #{proposal.id}
+                        </p>
+                      </div>
+                    </td>
 
-                  <td className="p-4">
-                    <span className="font-semibold text-emerald-400">
-                      {proposal.score}
-                    </span>
-                  </td>
+                    <td className="p-4 text-white font-medium">
+                      ₹{Number(proposal.value).toLocaleString()}
+                    </td>
 
-                  <td className="p-4">
-                    <ProposalStatusBadge
-                      status={proposal.status}
-                    />
-                  </td>
+                    {/* 📊 Score Column: Progress Ring with Side-by-Side Label */}
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        {/* The Circular Progress Graphic */}
+                        <div className="relative w-7 h-7 shrink-0">
+                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 32 32">
+                            {/* Track Circle */}
+                            <circle
+                              cx="16"
+                              cy="16"
+                              r={radius}
+                              className="stroke-slate-800"
+                              strokeWidth="3.5"
+                              fill="transparent"
+                            />
+                            {/* Dynamic Filled Arc */}
+                            <circle
+                              cx="16"
+                              cy="16"
+                              r={radius}
+                              className={`transition-all duration-500 ease-out ${
+                                scoreNum >= 80 ? "stroke-emerald-400" : scoreNum >= 50 ? "stroke-amber-400" : "stroke-rose-500"
+                              }`}
+                              strokeWidth="3.5"
+                              fill="transparent"
+                              strokeDasharray={circumference}
+                              strokeDashoffset={strokeOffset}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </div>
+                        
+                        {/* 💡 Text Number Pulled Completely Out of the Circle */}
+                        <span className={`text-sm font-semibold tracking-wide ${
+                          scoreNum >= 80 ? "text-emerald-400" : scoreNum >= 50 ? "text-amber-400" : "text-rose-400"
+                        }`}>
+                          {scoreNum}%
+                        </span>
+                      </div>
+                    </td>
 
-                  <td className="p-4">
-                    <div className="flex flex-wrap gap-2">
+                    <td className="p-4">
+                      <ProposalStatusBadge
+                        status={proposal.status}
+                      />
+                    </td>
 
-                      <button
-                        onClick={() =>
-                          onEdit(proposal)
-                        }
-                        className="rounded-lg bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-400 hover:bg-blue-500/20"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          onDelete(proposal)
-                        }
-                        className="rounded-lg bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20"
-                      >
-                        Delete
-                      </button>
-
-                      {proposal.status !==
-                        "Won" && (
+                    <td className="p-4">
+                      <div className="flex flex-wrap gap-2">
                         <button
-                          onClick={() =>
-                            onWon(
-                              proposal
-                            )
-                          }
-                          className="rounded-lg bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20"
+                          onClick={() => onEdit(proposal)}
+                          className="rounded-lg bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-400 hover:bg-blue-500/20 transition-all"
                         >
-                          Won
+                          Edit
                         </button>
-                      )}
 
-                      {proposal.status !==
-                        "Lost" && (
                         <button
-                          onClick={() =>
-                            onLost(
-                              proposal
-                            )
-                          }
-                          className="rounded-lg bg-orange-500/10 px-3 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/20"
+                          onClick={() => onDelete(proposal)}
+                          className="rounded-lg bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20 transition-all"
                         >
-                          Lost
+                          Delete
                         </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
+
+                        {proposal.status !== "Won" && (
+                          <button
+                            onClick={() => onWon(proposal)}
+                            className="rounded-lg bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                          >
+                            Won
+                          </button>
+                        )}
+
+                        {proposal.status !== "Lost" && (
+                          <button
+                            onClick={() => onLost(proposal)}
+                            className="rounded-lg bg-orange-500/10 px-3 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/20 transition-all"
+                          >
+                            Lost
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
