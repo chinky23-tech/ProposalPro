@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Plus, Search, FileText, Layers, Clock, Loader2 } from "lucide-react";
-import useTemplates from "../../../hooks/useTemplates"; // Your custom hook tracking API calls
+import useTemplates from "../../../hooks/useTemplates"; 
 import TemplateGrid from "../../../components/templates/TemplateGrid";
 import TemplateModal from "../../../components/templates/TemplateModal";
 import TemplateEmptyState from "../../../components/templates/TemplateEmptyState";
@@ -12,7 +12,6 @@ export default function Templates() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
 
-  // Directly hook into your dynamic api middleware handler
   const { templates, loading, error, createTemplate, updateTemplate, deleteTemplate, refresh } = useTemplates();
 
   const handleOpenCreateModal = () => {
@@ -25,25 +24,43 @@ export default function Templates() {
     setIsModalOpen(true);
   };
 
-  const handleModalSubmit = async (formData) => {
-  setFormSubmitting(true);
-  try {
-    if (selectedTemplate) {
-      // Updates existing templates via dynamic PUT endpoint
-      await updateTemplate(selectedTemplate.id, formData);
-    } else {
-      // Submits raw state forms via dynamic POST endpoint
-      await createTemplate(formData);
+  const handleDuplicateTemplate = async (template) => {
+    try {
+      const duplicatedData = {
+        title: `${template.title} (Copy)`,
+        description: template.description,
+        category: template.category,
+        value: template.value || template.defaultValue || "0"
+      };
+      await createTemplate(duplicatedData);
+      refresh();
+    } catch (err) {
+      console.error("Failed to duplicate template:", err);
     }
-    setIsModalOpen(false);
-    refresh(); // 🛠️ Changed from refreshTemplates() to match hook!
-  } catch (err) {
-    console.error("Template persistence transaction error:", err);
-  } finally {
-    setFormSubmitting(false);
-  }
-};
-  // Derived structural analytics metrics computed directly from data state array
+  };
+
+  const handleUseTemplate = (template) => {
+    // Navigate or trigger your Proposal Creation flow prefilled with this template data
+    console.log("Using template to craft proposal:", template);
+  };
+
+  const handleModalSubmit = async (formData) => {
+    setFormSubmitting(true);
+    try {
+      if (selectedTemplate) {
+        await updateTemplate(selectedTemplate.id, formData);
+      } else {
+        await createTemplate(formData);
+      }
+      setIsModalOpen(false);
+      refresh(); 
+    } catch (err) {
+      console.error("Template persistence transaction error:", err);
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
   const totalTemplates = templates?.length || 0;
   
   const uniqueCategoriesCount = templates 
@@ -59,7 +76,6 @@ export default function Templates() {
       })
     : "No modifications";
 
-  // Filter items programmatically
   const filteredTemplates = templates?.filter(t => 
     t.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.category?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -90,10 +106,9 @@ export default function Templates() {
         )}
       </div>
 
-      {/* Dynamic Production Metrics HUD */}
+      {/* Analytics Metrics HUD */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Total Templates */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/50 p-6 backdrop-blur-xl group hover:border-emerald-500/30 transition-all duration-300">
+        <div className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/50 p-6 backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <FileText className="w-5 h-5" />
@@ -107,8 +122,7 @@ export default function Templates() {
           </div>
         </div>
 
-        {/* Dynamic Categories derived from content data definitions */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/50 p-6 backdrop-blur-xl group hover:border-indigo-500/30 transition-all duration-300">
+        <div className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/50 p-6 backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
               <Layers className="w-5 h-5" />
@@ -122,8 +136,7 @@ export default function Templates() {
           </div>
         </div>
 
-        {/* Exact Timeline Stamp calculation parsed from JSON string timestamps */}
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/50 p-6 backdrop-blur-xl group hover:border-amber-500/30 transition-all duration-300">
+        <div className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/50 p-6 backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
               <Clock className="w-5 h-5" />
@@ -152,14 +165,14 @@ export default function Templates() {
         </div>
       </div>
 
-      {/* Error Interface Boundary */}
+      {/* Error Bound Banner */}
       {error && (
         <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400">
-          Failed to synchronize template configurations. Details: {error.message || "Network Intercept Fail"}
+          Failed to synchronize template configurations: {error}
         </div>
       )}
 
-      {/* Dynamic Central View Router State Tree */}
+      {/* Central View Router State Tree */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
@@ -168,14 +181,18 @@ export default function Templates() {
       ) : totalTemplates === 0 ? (
         <TemplateEmptyState onCreateClick={handleOpenCreateModal} />
       ) : (
+        /* 🛠️ FIX: Mapped exact prop-names to match TemplateGrid's expectations */
         <TemplateGrid 
           templates={filteredTemplates} 
-          onEditClick={handleOpenEditModal}
-          onDeleteClick={deleteTemplate}
+          onEdit={handleOpenEditModal}
+          onDelete={deleteTemplate}
+          onDuplicate={handleDuplicateTemplate}
+          onUse={handleUseTemplate}
+          onCreate={handleOpenCreateModal}
         />
       )}
 
-      {/* Template Document Form Context Window Modal */}
+      {/* Template Document Form Modal */}
       <TemplateModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -184,5 +201,5 @@ export default function Templates() {
         loading={formSubmitting}
       />
     </div>
-  );
+  ); 
 }
