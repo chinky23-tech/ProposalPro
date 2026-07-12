@@ -87,7 +87,7 @@ export default function Templates() {
       {/* Header Container */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold tracking-tight bg-linear-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
             Template Library
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -143,7 +143,7 @@ export default function Templates() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Last Modified</p>
-              <h3 className="text-sm font-bold mt-2 text-slate-200 truncate max-w-[220px]">
+              <h3 className="text-sm font-bold mt-2 text-slate-200 truncate max-w-220px">
                 {loading ? "Syncing timeline..." : lastUpdatedText}
               </h3>
             </div>
