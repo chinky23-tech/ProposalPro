@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Search, FileText, Layers, Clock, Loader2 } from "lucide-react";
 import useTemplates from "../../../hooks/useTemplates"; 
 import TemplateGrid from "../../../components/templates/TemplateGrid";
@@ -7,12 +8,16 @@ import TemplateEmptyState from "../../../components/templates/TemplateEmptyState
 import Button from "../../../components/ui/Button";
 
 export default function Templates() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [formSubmitting, setFormSubmitting] = useState(false);
 
   const { templates, loading, error, createTemplate, updateTemplate, deleteTemplate, refresh } = useTemplates();
+
+
+
 
   const handleOpenCreateModal = () => {
     setSelectedTemplate(null);
@@ -39,11 +44,20 @@ export default function Templates() {
     }
   };
 
-  const handleUseTemplate = (template) => {
-    // Navigate or trigger your Proposal Creation flow prefilled with this template data
-    console.log("Using template to craft proposal:", template);
-  };
-
+ const handleUseTemplate = (template) => {
+  // 🛠️ Route dynamically over to your Proposals workspace layout
+  navigate("/dashboard/proposals", { 
+    state: { 
+      prefilledTemplate: {
+        templateId: template.id,
+        title: template.title,
+        content: template.content || template.description || "",
+        category: template.category || "General"
+      },
+      openCreateModal: true // Signal trigger to let the proposal page know to open up its creation popup right away
+    } 
+  });
+};
   const handleModalSubmit = async (formData) => {
     setFormSubmitting(true);
     try {
@@ -186,6 +200,8 @@ export default function Templates() {
           templates={filteredTemplates} 
           onEdit={handleOpenEditModal}
           onDelete={deleteTemplate}
+ 
+  
           onDuplicate={handleDuplicateTemplate}
           onUse={handleUseTemplate}
           onCreate={handleOpenCreateModal}

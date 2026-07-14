@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 
 import { useProposals } from "../../../hooks/useProposals";
-
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import ProposalToolbar from "../../../components/proposals/ProposalToolbar";
 import ProposalTable from "../../../components/proposals/ProposalTable";
 import ProposalModal from "../../../components/proposals/ProposalModal";
@@ -14,7 +15,9 @@ import { toast } from "react-toastify";
 export default function Proposals() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
-
+  const location = useLocation();
+const [isModalOpen, setIsModalOpen] = useState(false);
+const [prefilledData, setPrefilledData] = useState(null);
   const [showModal, setShowModal] =
     useState(false);
 
@@ -38,7 +41,15 @@ export default function Proposals() {
     session?.token
   );
 };
-
+useEffect(() => {
+  if (location.state?.openCreateModal && location.state?.prefilledTemplate) {
+    setPrefilledData(location.state.prefilledTemplate);
+    setIsModalOpen(true);
+    
+    // Clean up history state so it doesn't reopen on a page refresh
+    window.history.replaceState({}, document.title);
+  }
+}, [location]);
   const filteredProposals = useMemo(() => {
     return proposals.filter((proposal) => {
       const matchesSearch =

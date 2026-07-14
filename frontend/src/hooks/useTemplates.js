@@ -51,17 +51,28 @@ export const useTemplates = () => {
   };
 
   // ➕ DELETE /api/templates/{id}
-  const deleteTemplate = async (id) => {
-    try {
-      setError("");
-      await templatesApi.deleteTemplate(id, getToken());
-      // Optimistically update UI state list
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
-    } catch (err) {
-      setError(err.message || "Failed to delete template");
-      throw err;
+  // 🛠️ Update the deleteTemplate method inside useTemplates.js:
+const deleteTemplate = async (id) => {
+  try {
+    setError("");
+    
+    // Extract numerical value clearly even if an object structure leaked down
+    const cleanId = typeof id === 'object' ? id?.id : id;
+    const parsedIntId = Number(cleanId);
+    
+    if (isNaN(parsedIntId)) {
+      throw new Error(`Invalid identification token parameter received: ${id}`);
     }
-  };
+
+    await templatesApi.deleteTemplate(parsedIntId, getToken());
+    
+    // Optimistically update UI list state
+    setTemplates((prev) => prev.filter((t) => Number(t.id) !== parsedIntId));
+  } catch (err) {
+    setError(err.message || "Failed to delete template");
+    throw err;
+  }
+};
 
   useEffect(() => {
     loadTemplates();

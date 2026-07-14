@@ -49,8 +49,8 @@ export default function TemplateCard({
       {/* Description */}
 
       <p className="mt-5 line-clamp-3 text-sm text-slate-400">
-        {template.description ||
-          "No description available"}
+        {template.content ||
+          "No content available"}
       </p>
 
       {/* Meta */}
