@@ -7,6 +7,7 @@ import TemplateModal from "../../../components/templates/TemplateModal";
 import TemplateEmptyState from "../../../components/templates/TemplateEmptyState";
 import Button from "../../../components/ui/Button";
 
+
 export default function Templates() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,17 +45,15 @@ export default function Templates() {
     }
   };
 
- const handleUseTemplate = (template) => {
-  // 🛠️ Route dynamically over to your Proposals workspace layout
-  navigate("/dashboard/proposals", { 
+const handleUseTemplate = (template) => {
+  // 🚀 Switch tabs smoothly to the AI Proposal Studio instead of the list pipeline
+  navigate("/dashboard/proposal-studio", { 
     state: { 
       prefilledTemplate: {
         templateId: template.id,
         title: template.title,
-        content: template.content || template.description || "",
-        category: template.category || "General"
-      },
-      openCreateModal: true // Signal trigger to let the proposal page know to open up its creation popup right away
+        content: template.content || template.description || ""
+      }
     } 
   });
 };
