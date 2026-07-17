@@ -19,10 +19,10 @@ export const Select = React.forwardRef(
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
 
-   // 1. Make the lookup case-insensitive or string-safe just in case
-const selectedOption = options.find(
-  (opt) => String(opt.value).trim() === String(value).trim()
-);
+    const selectedOption = options.find(
+      (opt) => String(opt.value).trim() === String(value).trim()
+    );
+
     useEffect(() => {
       const handleClickOutside = (event) => {
         if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -34,17 +34,16 @@ const selectedOption = options.find(
     }, []);
 
     const handleOptionClick = (optionValue) => {
-  if (onChange) {
-    // Pass BOTH name and value back so e.target.name works flawlessly!
-    onChange({ 
-      target: { 
-        name: props.name, 
-        value: optionValue 
-      } 
-    });
-  }
-  setIsOpen(false);
-};
+      if (onChange) {
+        onChange({ 
+          target: { 
+            name: props.name, 
+            value: optionValue 
+          } 
+        });
+      }
+      setIsOpen(false);
+    };
 
     const isDark = variant === "dark";
 
@@ -54,7 +53,7 @@ const selectedOption = options.find(
         className={`w-full flex flex-col gap-1.5 relative ${className}`}
       >
         {label && (
-          <label className={`text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-700"}`}>
+          <label className={`text-xs font-semibold uppercase tracking-wider ${isDark ? "text-slate-400" : "text-slate-600"}`}>
             {label}
           </label>
         )}
@@ -70,21 +69,20 @@ const selectedOption = options.find(
               items-center
               justify-between
               px-4
-              py-2.5
+              h-11
               text-sm
               rounded-xl
               transition-all
               border
               text-left
               focus:outline-none
-              focus:ring-2
               ${
                 isDark 
-                  ? "bg-slate-900 border-slate-800 text-white focus:border-emerald-500 focus:ring-emerald-500/20" 
-                  : "bg-white border-slate-200 text-slate-900 focus:border-emerald-500 focus:ring-emerald-500/20"
+                  ? "bg-slate-950 border-slate-800 text-white focus:border-emerald-500" 
+                  : "bg-white border-slate-200 text-slate-900 focus:border-emerald-500"
               }
-              ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : ""}
-              ${!selectedOption && isDark ? "text-slate-400" : ""}
+              ${error ? "border-red-500" : ""}
+              ${!selectedOption && isDark ? "text-slate-500" : ""}
               ${!selectedOption && !isDark ? "text-slate-500" : ""}
             `}
             {...props}
@@ -92,7 +90,7 @@ const selectedOption = options.find(
             <span>{selectedOption ? selectedOption.label : placeholder}</span>
             <ChevronDown 
               className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                isOpen ? "transform rotate-180" : ""
+                isOpen ? "transform rotate-180 text-emerald-400" : ""
               }`} 
             />
           </button>
@@ -100,12 +98,12 @@ const selectedOption = options.find(
           {isOpen && (
             <ul 
               className={`
-                absolute z-9999 w-full max-h-48 overflow-auto 
-                rounded-xl shadow-xl py-1 focus:outline-none border
+                absolute z-50 w-full max-h-48 overflow-y-auto 
+                rounded-xl shadow-2xl py-1 border top-full mt-1.5
                 ${
                   isDark 
-                    ? "bg-slate-900 border-slate-800 text-slate-200 top-full mt-1.5" 
-                    : "bg-white border-slate-200 text-slate-800 bottom-full mb-1.5" // <-- Forces it UPWARDS inside the light modal form
+                    ? "bg-slate-900 border-slate-800 text-slate-200" 
+                    : "bg-white border-slate-200 text-slate-800"
                 }
               `}
             >
@@ -113,7 +111,7 @@ const selectedOption = options.find(
                 <li
                   onClick={() => handleOptionClick("")}
                   className={`px-4 py-2 text-sm cursor-pointer transition-colors ${
-                    isDark ? "text-slate-400 hover:bg-slate-800" : "text-slate-400 hover:bg-slate-50"
+                    isDark ? "text-slate-400 hover:bg-slate-950" : "text-slate-400 hover:bg-slate-50"
                   }`}
                 >
                   {placeholder}
@@ -121,8 +119,7 @@ const selectedOption = options.find(
               )}
               
               {options.map((option) => {
-                // 2. Update this line inside the map loop
-const isSelected = String(option.value).trim() === String(value).trim();
+                const isSelected = String(option.value).trim() === String(value).trim();
                 return (
                   <li
                     key={option.value}
@@ -138,14 +135,14 @@ const isSelected = String(option.value).trim() === String(value).trim();
                       justify-between
                       ${
                         isSelected
-                          ? "bg-emerald-50 text-emerald-700 font-medium" // <-- Changed from blue to Emerald
-                          : isDark ? "text-slate-200 hover:bg-slate-800" : "text-slate-800 hover:bg-slate-50"
+                          ? "bg-emerald-600/20 text-emerald-400 font-medium"
+                          : isDark ? "text-slate-200 hover:bg-slate-950 hover:text-white" : "text-slate-800 hover:bg-slate-50"
                       }
                     `}
                   >
                     <span>{option.label}</span>
                     {isSelected && (
-                      <Check className="w-4 h-4 text-emerald-600" /> // <-- Changed icon to Emerald
+                      <Check className="w-4 h-4 text-emerald-500" />
                     )}
                   </li>
                 );

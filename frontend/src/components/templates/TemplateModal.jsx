@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Loader2, FilePlus2 } from "lucide-react";
+// 🛠️ Import your new custom select component
+import Select from "../ui/Select"; 
 
 export default function TemplateModal({ isOpen, onClose, onSubmit, template, loading }) {
   const [formData, setFormData] = useState({
@@ -8,6 +10,14 @@ export default function TemplateModal({ isOpen, onClose, onSubmit, template, loa
     description: "",
     content: ""
   });
+
+  // Map out options layout configuration for your custom component
+  const categoryOptions = [
+    { value: "General", label: "General" },
+    { value: "Web Development", label: "Web Development" },
+    { value: "UI/UX Design", label: "UI/UX Design" },
+    { value: "Marketing", label: "Marketing" }
+  ];
 
   useEffect(() => {
     if (template) {
@@ -18,12 +28,7 @@ export default function TemplateModal({ isOpen, onClose, onSubmit, template, loa
         content: template.content || ""
       });
     } else {
-      setFormData({
-        title: "",
-        category: "General",
-        description: "",
-        content: ""
-      });
+      setFormData({ title: "", category: "General", description: "", content: "" });
     }
   }, [template, isOpen]);
 
@@ -32,6 +37,11 @@ export default function TemplateModal({ isOpen, onClose, onSubmit, template, loa
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Explicit inline state updater handler for the custom component structure
+  const handleCategoryChange = (val) => {
+    setFormData((prev) => ({ ...prev, category: val }));
   };
 
   const handleSubmit = (e) => {
@@ -51,10 +61,7 @@ export default function TemplateModal({ isOpen, onClose, onSubmit, template, loa
               {template ? "Edit Template" : "Create Template"}
             </h3>
           </div>
-          <button 
-            onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
-          >
+          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -78,22 +85,16 @@ export default function TemplateModal({ isOpen, onClose, onSubmit, template, loa
             />
           </div>
 
-          {/* Category Selection */}
+          {/* 💎 Upgraded Category with Custom Select */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Category
-            </label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="mt-1.5 w-full h-11 px-4 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 outline-none focus:border-emerald-500 transition-all text-sm"
-            >
-              <option value="General">General</option>
-              <option value="Web Development">Web Development</option>
-              <option value="UI/UX Design">UI/UX Design</option>
-              <option value="Marketing">Marketing</option>
-            </select>
+            <Select
+    label="Category"
+    name="category"          
+    variant="dark"         
+    options={categoryOptions}
+    value={formData.category}
+    onChange={handleChange}  
+  />
           </div>
 
           {/* Description */}
@@ -129,11 +130,7 @@ export default function TemplateModal({ isOpen, onClose, onSubmit, template, loa
 
           {/* Action Footer */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-11 px-5 rounded-xl border border-slate-800 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-all"
-            >
+            <button type="button" onClick={onClose} className="h-11 px-5 rounded-xl border border-slate-800 text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-all">
               Cancel
             </button>
             <button
