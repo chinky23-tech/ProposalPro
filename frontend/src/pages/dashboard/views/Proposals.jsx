@@ -41,12 +41,24 @@ const [prefilledData, setPrefilledData] = useState(null);
     session?.token
   );
 };
-useEffect(() => {
+/*useEffect(() => {
   if (location.state?.openCreateModal && location.state?.prefilledTemplate) {
     setPrefilledData(location.state.prefilledTemplate);
     setIsModalOpen(true);
     
     // Clean up history state so it doesn't reopen on a page refresh
+    window.history.replaceState({}, document.title);
+  }
+}, [location]);*/
+// 🛠️ Update this useEffect inside Proposals.jsx:
+useEffect(() => {
+  // Check if we arrived here from the "Use Template" redirection
+  if (location.state?.openEditModal && location.state?.proposalData) {
+    // Set the state so the Proposal Modal opens prefilled with our new document
+    setSelectedProposal(location.state.proposalData);
+    setShowModal(true);
+    
+    // Clear out the browser history state so a page refresh doesn't keep popping it open
     window.history.replaceState({}, document.title);
   }
 }, [location]);
