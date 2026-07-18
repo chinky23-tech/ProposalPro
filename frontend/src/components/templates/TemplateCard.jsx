@@ -76,7 +76,7 @@ export default function TemplateCard({
       </div>
 
       {/* Description Preview */}
-      <p className="mt-5 line-clamp-3 text-sm text-slate-400 min-h-[60px]">
+      <p className="mt-5 line-clamp-3 text-sm text-slate-400 min-h-60px">
         {cleanSnippet}
       </p>
 
