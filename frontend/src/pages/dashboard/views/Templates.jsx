@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search, FileText, Layers, Clock, Loader2, Sparkles, X } from "lucide-react";
 import { toast } from "react-toastify";
@@ -38,6 +38,11 @@ export default function Templates() {
     deleteTemplate, 
     refresh 
   } = useTemplates();
+
+
+  useEffect(() => {
+    console.log("Templates Data Loaded:", templates);
+  }, [templates]);
 
   const getToken = () => {
     const session = getStoredAuthSession();
@@ -206,7 +211,7 @@ export default function Templates() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Last Modified</p>
-              <h3 className="text-sm font-bold mt-2 text-slate-200 truncate max-w-[220px]">{loading ? "Syncing..." : lastUpdatedText}</h3>
+              <h3 className="text-sm font-bold mt-2 text-slate-200 truncate max-w-220px">{loading ? "Syncing..." : lastUpdatedText}</h3>
             </div>
           </div>
         </div>
