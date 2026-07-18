@@ -1,5 +1,5 @@
 export const validateTemplateInput = (data) => {
-  const { title, content } = data;
+  const { title, content, category } = data;
 
   if (!title || title.trim() === "") {
     throw new Error("Template title is required");
@@ -11,6 +11,7 @@ export const validateTemplateInput = (data) => {
 
   return {
     title: title.trim(),
-    content: content.trim()
+    content: content.trim(),
+    category: category && category.trim() !== "" ? category.trim() : "General"
   };
 };

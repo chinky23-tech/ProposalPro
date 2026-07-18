@@ -1,14 +1,16 @@
 import pool from "../config/db.js";
 
 export const insertTemplate = async (templateData) => {
-  const { user_id, title, content } = templateData;
+  // 🛠️ 1. Extract category from the incoming data object
+  const { user_id, title, content, category } = templateData;
   const result = await pool.query(
     `
-    INSERT INTO templates (user_id, title, content)
-    VALUES ($1, $2, $3)
+    INSERT INTO templates (user_id, title, content, category)
+    VALUES ($1, $2, $3, $4)
     RETURNING *
     `,
-    [user_id, title, content]
+    // 🛠️ 2. Pass category to the $4 parameter array (with 'General' fallback)
+    [user_id, title, content, category || "General"]
   );
   return result.rows[0];
 };
@@ -30,15 +32,17 @@ export const selectTemplateById = async (id) => {
 };
 
 export const updateTemplateById = async (id, templateData) => {
-  const { title, content } = templateData;
+  // 🛠️ 3. Extract category here for updates
+  const { title, content, category } = templateData;
   const result = await pool.query(
     `
     UPDATE templates 
-    SET title = $1, content = $2, updated_at = NOW()
-    WHERE id = $3
+    SET title = $1, content = $2, category = $3, updated_at = NOW()
+    WHERE id = $4
     RETURNING *
     `,
-    [title, content, id]
+    // 🛠️ 4. Align parameters: title($1), content($2), category($3), id($4)
+    [title, content, category || "General", id]
   );
   return result.rows[0];
 };
