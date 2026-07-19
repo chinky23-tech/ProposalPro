@@ -45,19 +45,19 @@ export default function ProposalPreview() {
     }
   }, [id]);
 
-  const handleShareWithClient = async () => {
-    setSharing(true);
-    try {
-      // 🛠️ 3. ROUTE THROUGH YOUR AUTHORIZED CHANNELS FOR link distribution
-      await proposalsApi.shareProposal(id, getToken());
-      toast.success("Secure proposal link sent to client via Resend!");
-    } catch (err) {
-      toast.error("Failed to distribute secure proposal link");
-    } finally {
-      setSharing(false);
-    }
-  };
-
+// Inside your ProposalPreview.jsx file
+const handleShareWithClient = async () => {
+  setSharing(true);
+  try {
+    // 🛠️ Pass the client email dynamically from the fetched proposal record!
+    await proposalsApi.shareProposal(id, { clientEmail: proposal.client_email || proposal.email }, getToken());
+    toast.success("Secure proposal link sent to client via Resend!");
+  } catch (err) {
+    toast.error("Failed to distribute secure proposal link");
+  } finally {
+    setSharing(false);
+  }
+};
   if (loading) return <div className="p-8 text-center text-slate-400">Loading document canvas...</div>;
   if (!proposal) return <div className="p-8 text-center text-red-400">Proposal record not found.</div>;
 
@@ -92,7 +92,7 @@ export default function ProposalPreview() {
       </div>
 
       {/* Document Proposal Canvas */}
-      <div className="bg-slate-950 border border-slate-800/80 rounded-2xl p-8 shadow-2xl min-h-[500px] text-left overflow-y-auto">
+      <div className="bg-slate-950 border border-slate-800/80 rounded-2xl p-8 shadow-2xl min-h-500px text-left overflow-y-auto">
         <div className="prose prose-invert max-w-none whitespace-pre-wrap text-slate-300 text-sm leading-relaxed">
           {proposal.content || "This proposal document contains no structured text copy."}
         </div>
