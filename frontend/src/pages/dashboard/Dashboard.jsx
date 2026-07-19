@@ -13,6 +13,7 @@ import Analytics from "./views/Analytics";
 import Team from "./views/Team";
 import Billing from "./views/Billing";
 import Settings from "./views/Settings";
+import ProposalPreview from "/src/components/proposals/ProposalPreview.jsx";
 
 export default function Dashboard() {
 return ( <DashboardLayout> <Routes>
@@ -30,6 +31,11 @@ element={<Overview />}
     <Route
       path="proposals"
       element={<Proposals />}
+    />
+
+    <Route 
+    path="proposals/preview/:id" 
+    element={<ProposalPreview />} 
     />
 
     <Route

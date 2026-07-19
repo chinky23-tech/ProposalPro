@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
-
+import { useLocation, useNavigate } from "react-router-dom";
 import { useProposals } from "../../../hooks/useProposals";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import ProposalToolbar from "../../../components/proposals/ProposalToolbar";
 import ProposalTable from "../../../components/proposals/ProposalTable";
 import ProposalModal from "../../../components/proposals/ProposalModal";
@@ -13,6 +12,7 @@ import { getStoredAuthSession } from "../../../api/auth";
 import { toast } from "react-toastify";
 
 export default function Proposals() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const location = useLocation();
@@ -41,15 +41,6 @@ const [prefilledData, setPrefilledData] = useState(null);
     session?.token
   );
 };
-/*useEffect(() => {
-  if (location.state?.openCreateModal && location.state?.prefilledTemplate) {
-    setPrefilledData(location.state.prefilledTemplate);
-    setIsModalOpen(true);
-    
-    // Clean up history state so it doesn't reopen on a page refresh
-    window.history.replaceState({}, document.title);
-  }
-}, [location]);*/
 // 🛠️ Update this useEffect inside Proposals.jsx:
 useEffect(() => {
   // Check if we arrived here from the "Use Template" redirection
@@ -220,6 +211,7 @@ const handleModalSubmit = async (formData) => {
         </p>
       </div>
 
+
       {/* Toolbar */}
 
       <ProposalToolbar
@@ -234,6 +226,7 @@ const handleModalSubmit = async (formData) => {
 
       <ProposalTable
         proposals={filteredProposals}
+        onView={(id) => navigate(`/dashboard/proposals/preview/${id}`)}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onWon={handleWon}

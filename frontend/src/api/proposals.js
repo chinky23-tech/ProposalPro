@@ -42,6 +42,12 @@ export const proposalsApi = {
       method: "PATCH",
       token,
     }),
+
+    shareProposal: (id, token) =>
+    request(`/proposals/${id}/share`, {
+      method: "POST",
+      token,
+    }),
 };
 
 export default proposalsApi;

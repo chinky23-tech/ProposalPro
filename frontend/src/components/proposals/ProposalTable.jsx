@@ -3,6 +3,7 @@ import ProposalStatusBadge from "./ProposalStatusBadge";
 
 export default function ProposalTable({
   proposals = [],
+  onView, // 🛠️ 1. Catch the new onView trigger prop here
   onEdit,
   onDelete,
   onWon,
@@ -52,9 +53,9 @@ export default function ProposalTable({
               </tr>
             ) : (
               proposals.map((proposal) => {
-                // 🛠️ Circular calculations per row element
+                // Circular calculations per row element
                 const scoreNum = Math.min(Math.max(Number(proposal.score || 0), 0), 100);
-                const radius = 12; // Adjusted slightly for side-by-side layout balance
+                const radius = 12; 
                 const circumference = 2 * Math.PI * radius;
                 const strokeOffset = circumference - (scoreNum / 100) * circumference;
 
@@ -69,7 +70,11 @@ export default function ProposalTable({
 
                     <td className="p-4">
                       <div>
-                        <p className="font-medium text-white">
+                        {/* 🛠️ 2. Wrapped the title with an onClick navigation trigger */}
+                        <p 
+                          onClick={() => onView?.(proposal.id)}
+                          className="font-medium text-white hover:text-emerald-400 cursor-pointer transition-colors inline-block"
+                        >
                           {proposal.title}
                         </p>
 
@@ -82,14 +87,12 @@ export default function ProposalTable({
                     <td className="p-4 text-white font-medium">
                       ₹{Number(proposal.value).toLocaleString()}
                     </td>
-
-                    {/* 📊 Score Column: Progress Ring with Side-by-Side Label */}
+  
+                    {/* Score Column: Progress Ring with Side-by-Side Label */}
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        {/* The Circular Progress Graphic */}
                         <div className="relative w-7 h-7 shrink-0">
                           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 32 32">
-                            {/* Track Circle */}
                             <circle
                               cx="16"
                               cy="16"
@@ -98,7 +101,6 @@ export default function ProposalTable({
                               strokeWidth="3.5"
                               fill="transparent"
                             />
-                            {/* Dynamic Filled Arc */}
                             <circle
                               cx="16"
                               cy="16"
@@ -115,7 +117,6 @@ export default function ProposalTable({
                           </svg>
                         </div>
                         
-                        {/* 💡 Text Number Pulled Completely Out of the Circle */}
                         <span className={`text-sm font-semibold tracking-wide ${
                           scoreNum >= 80 ? "text-emerald-400" : scoreNum >= 50 ? "text-amber-400" : "text-rose-400"
                         }`}>
@@ -132,6 +133,14 @@ export default function ProposalTable({
 
                     <td className="p-4">
                       <div className="flex flex-wrap gap-2">
+                        {/* 🛠️ 3. Added a clean explicit Preview button right next to Edit */}
+                        <button
+                          onClick={() => onView?.(proposal.id)}
+                          className="rounded-lg bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                        >
+                          Preview
+                        </button>
+
                         <button
                           onClick={() => onEdit(proposal)}
                           className="rounded-lg bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-400 hover:bg-blue-500/20 transition-all"
