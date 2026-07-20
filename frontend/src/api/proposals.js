@@ -43,9 +43,10 @@ export const proposalsApi = {
       token,
     }),
 
-    shareProposal: (id, token) =>
+    shareProposal: (id, emailPayload, token) =>
     request(`/proposals/${id}/share`, {
       method: "POST",
+      body: emailPayload,
       token,
     }),
 };

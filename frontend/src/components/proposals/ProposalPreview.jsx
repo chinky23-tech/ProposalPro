@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, FileText, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 import { toast } from "react-toastify";
 
 // 🛠️ 1. IMPORT YOUR CUSTOM API INSTANCE OR AXIOS
@@ -24,12 +24,7 @@ export default function ProposalPreview() {
     const fetchProposalDetails = async () => {
       try {
         setLoading(true);
-        
-        // 🛠️ 2. USE YOUR STANDARDIZED REPOSITORY INSTANCE LAYER WITH AUTH TOKEN
-        // If your proposalsApi doesn't have a getProposalById method yet, 
-        // fallback to: const response = await axios.get(`/api/proposals/${id}`, { headers: { Authorization: `Bearer ${getToken()}` } });
         const data = await proposalsApi.getProposalById(id, getToken());
-        
         // Adjust depending on whether your API wrapper returns data directly or wrapped in Axios response structure
         setProposal(data.data || data);
       } catch (err) {
@@ -45,19 +40,36 @@ export default function ProposalPreview() {
     }
   }, [id]);
 
-// Inside your ProposalPreview.jsx file
-const handleShareWithClient = async () => {
-  setSharing(true);
-  try {
-    // 🛠️ Pass the client email dynamically from the fetched proposal record!
-    await proposalsApi.shareProposal(id, { clientEmail: proposal.client_email || proposal.email }, getToken());
-    toast.success("Secure proposal link sent to client via Resend!");
-  } catch (err) {
-    toast.error("Failed to distribute secure proposal link");
-  } finally {
-    setSharing(false);
-  }
-};
+  // Inside your ProposalPreview.jsx file
+  const handleShareWithClient = async () => {
+    setSharing(true);
+    try {
+      // 🛠️ 2. Fallback cascade check to see exactly where your backend is passing the target client email address
+      const targetEmail = proposal?.client_email || proposal?.email || proposal?.client;
+      
+      console.log("Debug - Extracted targetEmail:", targetEmail);
+      console.log("Debug - Raw Full Proposal Object Details:", proposal);
+
+      if (!targetEmail) {
+        toast.error("Could not find a valid email address attached to this client record.");
+        setSharing(false);
+        return;
+      }
+
+      const payload = { clientEmail: targetEmail };
+      const token = getToken();
+
+      // 🛠️ 3. Fire your newly configured 3-parameter function
+      await proposalsApi.shareProposal(id, payload, token);
+      toast.success("Secure proposal link sent to client via Resend!");
+    } catch (err) {
+      console.error("Frontend Sharing Hook Exception Details:", err);
+      toast.error("Failed to distribute secure proposal link");
+    } finally {
+      setSharing(false);
+    }
+  };
+
   if (loading) return <div className="p-8 text-center text-slate-400">Loading document canvas...</div>;
   if (!proposal) return <div className="p-8 text-center text-red-400">Proposal record not found.</div>;
 
