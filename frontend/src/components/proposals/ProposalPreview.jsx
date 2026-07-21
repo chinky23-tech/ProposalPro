@@ -397,7 +397,7 @@ export default function ProposalPreview() {
       </div>
 
       {/* Document Proposal Canvas */}
-      <div className="bg-slate-950 border border-slate-800/80 rounded-2xl p-8 shadow-2xl min-h-[500px] text-left overflow-y-auto">
+      <div className="bg-slate-950 border border-slate-800/80 rounded-2xl p-8 shadow-2xl min-h-500px text-left overflow-y-auto">
         <div className="prose prose-invert max-w-none whitespace-pre-wrap text-slate-300 text-sm leading-relaxed">
           {proposal.content || "This proposal document contains no structured text copy."}
         </div>
