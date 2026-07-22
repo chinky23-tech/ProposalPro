@@ -2,30 +2,27 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { CheckCircle2, XCircle, FileText, AlertCircle, Clock } from "lucide-react";
 import { toast } from "react-toastify";
-
+import proposalsApi from "/src/api/proposals.js";
 
 export default function PublicProposalView() {
   const { token } = useParams();
   const [proposal, setProposal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorStatus, setErrorStatus] = useState(null);
-  const [actionState, setActionState] = useState(null); // 'Accepted' | 'Rejected' | null
+  const [actionState, setActionState] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchPublicProposal = async () => {
       try {
         setLoading(true);
-        // Calls GET /api/proposals/share/:token or /api/share/:token based on your backend
-        const response = await axios.get(`http://localhost:5001/api/proposals/share/${token}`);
-        
+        const response = await proposalsApi.getPublicProposal(token);
         const payload = response.data.data || response.data;
         setProposal(payload);
         if (payload.status) setActionState(payload.status);
       } catch (err) {
         console.error("Public Link Access Error:", err);
-        const status = err.response?.status;
-        setErrorStatus(status || 500);
+        setErrorStatus(err.response?.status || 500);
       } finally {
         setLoading(false);
       }
@@ -34,23 +31,24 @@ export default function PublicProposalView() {
     if (token) fetchPublicProposal();
   }, [token]);
 
-  const handleAction = async (decision) => {
+const handleAction = async (decision) => {
     setSubmitting(true);
     try {
-      const endpoint = decision === "Accepted" 
-        ? `http://localhost:5001/api/proposals/share/${token}/accept`
-        : `http://localhost:5001/api/proposals/share/${token}/reject`;
+     
+      if (decision === "Accepted") {
+        await proposalsApi.acceptPublicProposal(token);
+      } else {
+        await proposalsApi.rejectPublicProposal(token);
+      }
 
-      await axios.post(endpoint);
       setActionState(decision);
       toast.success(`Proposal marked as ${decision}!`);
     } catch (err) {
-      toast.error(err.response?.data?.message || `Failed to mark proposal as ${decision}`);
+      toast.error(err?.message || `Failed to mark proposal as ${decision}`);
     } finally {
       setSubmitting(false);
     }
   };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-slate-400">
@@ -60,7 +58,6 @@ export default function PublicProposalView() {
     );
   }
 
-  // Handle Expiry (410) or Invalid Token (404)
   if (errorStatus) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
@@ -83,7 +80,6 @@ export default function PublicProposalView() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      {/* Client Header Bar */}
       <header className="border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -92,16 +88,13 @@ export default function PublicProposalView() {
             </div>
             <span className="font-semibold text-sm tracking-wide text-white">ProposalPro</span>
           </div>
-
           <div className="text-xs text-slate-400">
             Document ID: <span className="font-mono text-slate-200">{token.slice(0, 8)}...</span>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-6 space-y-6 my-6">
-        {/* Banner if already Accepted or Rejected */}
         {actionState === "Accepted" && (
           <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 flex items-center gap-3 text-emerald-400 text-sm">
             <CheckCircle2 className="w-5 h-5 shrink-0" />
@@ -116,7 +109,6 @@ export default function PublicProposalView() {
           </div>
         )}
 
-        {/* Header HUD */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-2 shadow-xl">
           <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider">
             <FileText className="w-4 h-4" /> Business Proposal
@@ -124,20 +116,17 @@ export default function PublicProposalView() {
           <h1 className="text-3xl font-bold text-white tracking-tight">{proposal?.title}</h1>
         </div>
 
-        {/* Paper Document Canvas */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl min-h-500px">
+        <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl min-h-[500px]">
           <div className="prose prose-invert max-w-none whitespace-pre-wrap text-slate-300 text-sm leading-relaxed">
             {proposal?.content || "No document body available."}
           </div>
         </div>
 
-        {/* Bottom Sticky Action Bar */}
         {!actionState && (
           <div className="sticky bottom-6 bg-slate-900/90 border border-slate-800/90 backdrop-blur-lg rounded-2xl p-4 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-slate-400 text-center sm:text-left">
               Review the terms above and select your decision to update the project status instantly.
             </p>
-
             <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
               <button
                 onClick={() => handleAction("Rejected")}
@@ -146,7 +135,6 @@ export default function PublicProposalView() {
               >
                 <XCircle className="w-4 h-4" /> Decline
               </button>
-
               <button
                 onClick={() => handleAction("Accepted")}
                 disabled={submitting}
