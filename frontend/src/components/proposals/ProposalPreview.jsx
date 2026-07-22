@@ -202,7 +202,7 @@ export default function ProposalPreview() {
       </div>
 
       {/* Document Proposal Canvas */}
-      <div className="bg-slate-950 border border-slate-800/80 rounded-2xl p-8 shadow-2xl min-h-[500px] text-left overflow-y-auto">
+      <div className="bg-slate-950 border border-slate-800/80 rounded-2xl p-8 shadow-2xl min-h-500px text-left overflow-y-auto">
         <div className="prose prose-invert max-w-none whitespace-pre-wrap text-slate-300 text-sm leading-relaxed">
           {proposal.content || "This proposal document contains no structured text copy."}
         </div>
@@ -210,7 +210,7 @@ export default function ProposalPreview() {
 
       {/* 🌐 MULTI-CHANNEL SOCIAL SHARE MODAL */}
       {isShareModalOpen && shareData && (
-        <div className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-9999 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-lg w-full space-y-6 shadow-2xl">
             
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">

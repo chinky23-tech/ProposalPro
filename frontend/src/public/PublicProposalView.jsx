@@ -116,7 +116,7 @@ const handleAction = async (decision) => {
           <h1 className="text-3xl font-bold text-white tracking-tight">{proposal?.title}</h1>
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl min-h-[500px]">
+        <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl min-h-500px">
           <div className="prose prose-invert max-w-none whitespace-pre-wrap text-slate-300 text-sm leading-relaxed">
             {proposal?.content || "No document body available."}
           </div>
