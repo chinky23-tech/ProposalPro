@@ -1,14 +1,14 @@
 import pool from "../config/db.js";
 
 export const insertPackage = async (packageData) => {
-  const { user_id, name, description, price, features } = packageData;
+  const { user_id, name, description, price, features, billing_type } = packageData;
   const result = await pool.query(
     `
-    INSERT INTO packages (user_id, name, description, price, features)
-    VALUES ($1, $2, $3, $4, $5)
+    INSERT INTO packages (user_id, name, description, price, features, billing_type)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *
     `,
-    [user_id, name, description, price, features]
+    [user_id, name, description, price, features, billing_type]
   );
   return result.rows[0];
 };
@@ -30,15 +30,15 @@ export const selectPackageById = async (id) => {
 };
 
 export const updatePackageById = async (id, packageData) => {
-  const { name, description, price, features } = packageData;
+  const { name, description, price, features, billing_type } = packageData;
   const result = await pool.query(
     `
     UPDATE packages 
-    SET name = $1, description = $2, price = $3, features = $4, updated_at = NOW()
-    WHERE id = $5
+    SET name = $1, description = $2, price = $3, features = $4, billing_type = $5, updated_at = NOW()
+    WHERE id = $6
     RETURNING *
     `,
-    [name, description, price, features, id]
+    [name, description, price, features, billing_type, id]
   );
   return result.rows[0];
 };

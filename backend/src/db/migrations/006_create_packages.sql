@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS packages (
   description TEXT,
   price NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
   features TEXT[] DEFAULT '{}',
+  billing_type VARCHAR(50) NOT NULL DEFAULT 'one_time',
   created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

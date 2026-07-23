@@ -1,0 +1,2 @@
+ALTER TABLE packages
+ADD COLUMN IF NOT EXISTS billing_type VARCHAR(50) NOT NULL DEFAULT 'one_time';

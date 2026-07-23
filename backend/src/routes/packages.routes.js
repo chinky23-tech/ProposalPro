@@ -37,6 +37,9 @@ router.use(protect);
  *                 type: string
  *               price:
  *                 type: number
+ *               billing_type:
+ *                 type: string
+ *                 enum: [monthly, yearly, one_time]
  *               features:
  *                 type: array
  *                 items:
@@ -45,6 +48,7 @@ router.use(protect);
  *               name: "Premium E-Commerce Package"
  *               description: "Full stack customized online store deployment."
  *               price: 2499.99
+ *               billing_type: "monthly"
  *               features: ["Custom UI/UX Blueprint", "Payment Gateway Setup", "1 Year Support"]
  *     responses:
  *       '201':
@@ -115,6 +119,9 @@ router.route("/")
  *                 type: string
  *               price:
  *                 type: number
+ *               billing_type:
+ *                 type: string
+ *                 enum: [monthly, yearly, one_time]
  *               features:
  *                 type: array
  *                 items:
@@ -123,6 +130,7 @@ router.route("/")
  *               name: "Premium E-Commerce Package v2"
  *               description: "Includes enhanced tracking systems."
  *               price: 2800.00
+ *               billing_type: "yearly"
  *               features: ["Custom UI/UX Blueprint", "Payment Gateway Setup", "Priority Support"]
  *     responses:
  *       '200':
