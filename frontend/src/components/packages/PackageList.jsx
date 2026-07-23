@@ -74,7 +74,7 @@ export default function PackageList({ packages = [], onView, onEdit, onDelete, l
                 <h3 className="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
                   {pkg.name}
                 </h3>
-                <p className="text-xs text-slate-400 mt-1 line-clamp-2 min-h-[32px]">
+                <p className="text-xs text-slate-400 mt-1 line-clamp-2 min-h-32px">
                   {pkg.description || "No description provided."}
                 </p>
               </div>
