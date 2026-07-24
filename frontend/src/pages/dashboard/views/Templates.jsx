@@ -24,6 +24,7 @@ export default function Templates() {
   // States for the clean "Use Template" flow
   const [isUseModalOpen, setIsUseModalOpen] = useState(false);
   const [templateToUse, setTemplateToUse] = useState(null);
+  const [viewingTemplate, setViewingTemplate] = useState(null);
   const [clientName, setClientName] = useState("");
   const [customTitle, setCustomTitle] = useState("");
   const [customValue, setCustomValue] = useState("");
@@ -57,6 +58,58 @@ export default function Templates() {
   const handleOpenEditModal = (template) => {
     setSelectedTemplate(template);
     setIsModalOpen(true);
+  };
+
+  const handleOpenViewModal = (template) => {
+    setViewingTemplate(template);
+  };
+
+  const handleDeleteTemplate = (templateId) => {
+    toast(
+      ({ closeToast }) => (
+        <div className="space-y-3 p-1">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-white">Delete Template?</p>
+            <p className="text-[11px] text-slate-400">
+              This action cannot be undone. Are you sure you want to proceed?
+            </p>
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={closeToast}
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition-colors flex-1"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                closeToast();
+                try {
+                  await deleteTemplate(templateId);
+                  toast.success("Template deleted successfully!");
+                } catch (err) {
+                  toast.error(err?.message || "Failed to delete template");
+                }
+              }}
+              className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold transition-colors flex-1 shadow-md shadow-rose-900/30"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        icon: false,
+        style: {
+          background: "#0f172a",
+          border: "1px solid #1e293b",
+          borderRadius: "1rem",
+        },
+      }
+    );
   };
 
   const handleDuplicateTemplate = async (template) => {
@@ -248,10 +301,11 @@ export default function Templates() {
         <TemplateGrid 
           templates={filteredTemplates} 
           onEdit={handleOpenEditModal}
-          onDelete={deleteTemplate}
+          onDelete={handleDeleteTemplate}
           onDuplicate={handleDuplicateTemplate}
           onUse={handleUseTemplateClick}
           onCreate={handleOpenCreateModal}
+          onView={handleOpenViewModal}
         />
       )}
 

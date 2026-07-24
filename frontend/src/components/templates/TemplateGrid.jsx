@@ -8,6 +8,7 @@ export default function TemplateGrid({
   onDuplicate,
   onUse,
   onCreate,
+  onView,
 }) {
   if (
     !templates ||
@@ -31,6 +32,7 @@ export default function TemplateGrid({
             onDelete={onDelete}
             onDuplicate={onDuplicate}
             onUse={onUse}
+            onView={onView}
           />
         )
       )}

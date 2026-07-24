@@ -1,13 +1,15 @@
-import { Award } from "lucide-react";
 import ProposalStatusBadge from "./ProposalStatusBadge";
 
 export default function ProposalTable({
   proposals = [],
-  onView, // 🛠️ 1. Catch the new onView trigger prop here
+  onView,
   onEdit,
   onDelete,
   onWon,
   onLost,
+  onReview,
+  onViewed,
+  onSent,
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-emerald-900/20 bg-slate-900">
@@ -133,32 +135,58 @@ export default function ProposalTable({
 
                     <td className="p-4">
                       <div className="flex flex-wrap gap-2">
-                        {/* 🛠️ 3. Added a clean explicit Preview button right next to Edit */}
                         <button
                           onClick={() => onView?.(proposal.id)}
-                          className="rounded-lg bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                          className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-sm font-medium text-emerald-400 transition-all hover:bg-emerald-500/20"
                         >
-                          Preview
+                          View
                         </button>
 
                         <button
                           onClick={() => onEdit(proposal)}
-                          className="rounded-lg bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-400 hover:bg-blue-500/20 transition-all"
+                          className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-sm font-medium text-blue-400 transition-all hover:bg-blue-500/20"
                         >
                           Edit
                         </button>
 
                         <button
                           onClick={() => onDelete(proposal)}
-                          className="rounded-lg bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20 transition-all"
+                          className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-400 transition-all hover:bg-red-500/20"
                         >
                           Delete
                         </button>
 
+                        {proposal.status === "Draft" && (
+                          <button
+                            onClick={() => onReview?.(proposal)}
+                            className="rounded-lg border border-violet-500/20 bg-violet-500/10 px-3 py-1.5 text-sm font-medium text-violet-400 transition-all hover:bg-violet-500/20"
+                          >
+                            Review
+                          </button>
+                        )}
+
+                        {proposal.status === "Review" && (
+                          <button
+                            onClick={() => onViewed?.(proposal)}
+                            className="rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-1.5 text-sm font-medium text-cyan-400 transition-all hover:bg-cyan-500/20"
+                          >
+                            Viewed
+                          </button>
+                        )}
+
+                        {proposal.status === "Viewed" && (
+                          <button
+                            onClick={() => onSent?.(proposal)}
+                            className="rounded-lg border border-sky-500/20 bg-sky-500/10 px-3 py-1.5 text-sm font-medium text-sky-400 transition-all hover:bg-sky-500/20"
+                          >
+                            Sent
+                          </button>
+                        )}
+
                         {proposal.status !== "Won" && (
                           <button
                             onClick={() => onWon(proposal)}
-                            className="rounded-lg bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20 transition-all"
+                            className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-sm font-medium text-emerald-400 transition-all hover:bg-emerald-500/20"
                           >
                             Won
                           </button>
@@ -167,7 +195,7 @@ export default function ProposalTable({
                         {proposal.status !== "Lost" && (
                           <button
                             onClick={() => onLost(proposal)}
-                            className="rounded-lg bg-orange-500/10 px-3 py-1 text-xs font-medium text-orange-400 hover:bg-orange-500/20 transition-all"
+                            className="rounded-lg border border-orange-500/20 bg-orange-500/10 px-3 py-1.5 text-sm font-medium text-orange-400 transition-all hover:bg-orange-500/20"
                           >
                             Lost
                           </button>
