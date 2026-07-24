@@ -70,7 +70,7 @@ export default function TemplateCard({
             </div>
 
             <div className="min-w-0">
-              <h3 className="font-semibold text-white break-words whitespace-normal leading-snug">
+              <h3 className="font-semibold text-white wrap-break-word whitespace-normal leading-snug">
                 {template.title || template.name}
               </h3>
 
