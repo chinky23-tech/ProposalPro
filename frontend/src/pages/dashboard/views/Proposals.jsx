@@ -210,7 +210,7 @@ export default function Proposals() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] text-slate-400 text-sm">
+      <div className="flex items-center justify-center min-h-400px text-slate-400 text-sm">
         Loading proposals...
       </div>
     );
@@ -218,7 +218,7 @@ export default function Proposals() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] text-rose-400 text-sm">
+      <div className="flex items-center justify-center min-h-400px text-rose-400 text-sm">
         {error}
       </div>
     );
