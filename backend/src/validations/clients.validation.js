@@ -1,5 +1,5 @@
 export const validateClientInput = (data) => {
-  const { name, email, phone, company } = data;
+  const { name, email, phone, company ,address} = data;
 
   if (!name || name.trim() === "") {
     throw new Error("Client name is required");
@@ -13,6 +13,7 @@ export const validateClientInput = (data) => {
     name: name.trim(),
     email: email.trim().toLowerCase(),
     phone: phone ? phone.trim() : null,
-    company: company ? company.trim() : null
+    company: company ? company.trim() : null,
+    address: address ? address.trim() : null,
   };
 };
