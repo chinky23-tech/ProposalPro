@@ -28,7 +28,7 @@ export default function UploadDocumentModal({ isOpen, onClose, onUpload, loading
 
     const formData = new FormData();
     formData.append("file", selectedFile);
-    formData.append("fileType", fileType); // 👈 Satisfies backend validator requirement
+    formData.append("fileType", fileType); 
 
     onUpload(formData);
   };
@@ -37,7 +37,7 @@ export default function UploadDocumentModal({ isOpen, onClose, onUpload, loading
     CATEGORY_OPTIONS.find((opt) => opt.value === fileType)?.label || "Select Category";
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-9999 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
         
         {/* Modal Header */}
