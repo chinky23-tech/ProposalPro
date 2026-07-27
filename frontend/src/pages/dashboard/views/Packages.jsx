@@ -1,18 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Plus, Search, Layers, RefreshCw } from "lucide-react";
 import { toast } from "react-toastify";
 
-import packagesApi from "../../../api/packages.js";
-import { getStoredAuthSession } from "../../../api/auth.js";
+import { usePackages } from "../../../hooks/usePackages.js";
 
 import PackageList from "../../../components/packages/PackageList.jsx";
 import PackageModal from "../../../components/packages/PackageModal.jsx";
 import PackageDetails from "../../../components/packages/PackageDetails.jsx";
 
 export default function PackagesView() {
-  const [packages, setPackages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const {
+    packages,
+    loading,
+    submitting,
+    fetchPackages,
+    handleSavePackage,
+    confirmDelete,
+  } = usePackages();
+
   const [searchTerm, setSearchTerm] = useState("");
 
   // Modal States
@@ -20,115 +25,63 @@ export default function PackagesView() {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [viewingPackage, setViewingPackage] = useState(null);
 
-  const getToken = () => {
-    const session = getStoredAuthSession();
-    return session?.accessToken || session?.token;
-  };
-
-  const fetchPackages = async () => {
-    try {
-      setLoading(true);
-      const token = getToken();
-      const response = await packagesApi.getAllPackages(token);
-      
-      const payload = response?.data || response;
-      setPackages(Array.isArray(payload) ? payload : []);
-    } catch (err) {
-      console.error("Fetch Packages Error:", err);
-      toast.error(err?.message || "Failed to load service packages");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPackages();
-  }, []);
-
-  const handleCreateOrUpdate = async (formData) => {
-    setSubmitting(true);
-    const token = getToken();
-
-    try {
-      if (selectedPackage) {
-        const id = selectedPackage.id || selectedPackage._id;
-        await packagesApi.updatePackage(id, formData, token);
-        toast.success("Package updated successfully!");
-      } else {
-        await packagesApi.createPackage(formData, token);
-        toast.success("Package tier created!");
-      }
-
+  // Handle Create or Update submission
+  const onSubmitForm = async (formData) => {
+    const success = await handleSavePackage(formData, selectedPackage);
+    if (success) {
       setIsModalOpen(false);
       setSelectedPackage(null);
-      fetchPackages();
-    } catch (err) {
-      toast.error(err?.message || "Failed to save package tier");
-    } finally {
-      setSubmitting(false);
     }
   };
 
-// inside frontend/src/pages/dashboard/views/Packages.jsx
-
-const handleDelete = (id) => {
-  // 🌟 Modern Toast Confirmation instead of browser window.confirm
-  toast(
-    ({ closeToast }) => (
-      <div className="space-y-3 p-1">
-        <div className="space-y-1">
-          <p className="text-xs font-bold text-white">Delete Package Tier?</p>
-          <p className="text-[11px] text-slate-400">
-            This action cannot be undone. Are you sure you want to proceed?
-          </p>
+  // Toast confirmation dialog for deletion
+  const handleDelete = (id) => {
+    toast(
+      ({ closeToast }) => (
+        <div className="space-y-3 p-1">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-white">Delete Package Tier?</p>
+            <p className="text-[11px] text-slate-400">
+              This action cannot be undone. Are you sure you want to proceed?
+            </p>
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={closeToast}
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition-colors flex-1"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                closeToast();
+                confirmDelete(id);
+              }}
+              className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold transition-colors flex-1 shadow-md shadow-rose-900/30"
+            >
+              Delete
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2 pt-1">
-          <button
-            onClick={closeToast}
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold transition-colors flex-1"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={async () => {
-              closeToast();
-              confirmDelete(id);
-            }}
-            className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-semibold transition-colors flex-1 shadow-md shadow-rose-900/30"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    ),
-    {
-      autoClose: false,
-      closeOnClick: false,
-      draggable: false,
-      icon: false,
-      style: {
-        background: "#0f172a", // matches slate-900
-        border: "1px solid #1e293b", // matches slate-800
-        borderRadius: "1rem",
-      },
-    }
-  );
-};
+      ),
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        icon: false,
+        style: {
+          background: "#0f172a",
+          border: "1px solid #1e293b",
+          borderRadius: "1rem",
+        },
+      }
+    );
+  };
 
-const confirmDelete = async (id) => {
-  try {
-    const token = getToken();
-    await packagesApi.deletePackage(id, token);
-    toast.success("Package tier deleted successfully!");
-    fetchPackages();
-  } catch (err) {
-    toast.error(err?.message || "Failed to delete package");
-  }
-};
-
-  const filteredPackages = packages.filter((pkg) =>
-    pkg.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pkg.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPackages = packages.filter(
+    (pkg) =>
+      pkg.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pkg.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -197,7 +150,7 @@ const confirmDelete = async (id) => {
           setIsModalOpen(false);
           setSelectedPackage(null);
         }}
-        onSubmit={handleCreateOrUpdate}
+        onSubmit={onSubmitForm}
         initialData={selectedPackage}
         loading={submitting}
       />
