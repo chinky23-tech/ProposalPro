@@ -13,6 +13,7 @@ import packagesRoutes from "./routes/packages.routes.js";
 import templatesRouter from "./routes/templates.routes.js";
 import documentRoutes from "./routes/document.routes.js";
 import shareRoutes from "./routes/share.routes.js";
+import billingRoutes from "./routes/biiling.routes.js";
 const app = express();
 
 app.use(cors());
@@ -40,6 +41,7 @@ app.use("/api/packages", packagesRoutes);
 app.use("/api/templates", templatesRouter);
 app.use("/api/documents", documentRoutes);
 app.use("/api", shareRoutes);
+app.use("/api/billing", billingRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
