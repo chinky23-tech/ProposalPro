@@ -1,4 +1,4 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import protect from "../middleware/auth.middleware.js";
 
 import {
@@ -7,15 +7,104 @@ import {
   getBillingById,
   updateBilling,
   deleteBilling,
+  getSubscriptionStatus,
+  createCheckoutSession,
+  createCustomerPortal,
+  handleStripeWebhook,
 } from "../controllers/billing.controller.js";
 
-import {
-  validateBillingIdParam,
-} from "../validations/billing.validation.js";
+import { validateBillingIdParam } from "../validations/billing.validation.js";
 
 const router = Router();
 
+// ==========================================
+// Public Webhook Route (Must remain BEFORE auth middleware)
+// ==========================================
+router.post(
+  "/webhook", 
+  express.raw({ type: "application/json" }), 
+  handleStripeWebhook
+);
+
+// Protect all routes defined below this line
 router.use(protect);
+
+// ==========================================
+// Subscription & Stripe Endpoints
+// ==========================================
+
+/**
+ * @openapi
+ * /api/billing/subscription:
+ *   get:
+ *     summary: Get active subscription status and AI quotas
+ *     tags:
+ *       - Billing
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Active subscription details and AI usage limits
+ */
+router.get("/subscription", getSubscriptionStatus);
+
+/**
+ * @openapi
+ * /api/billing/checkout-session:
+ *   post:
+ *     summary: Create a Stripe Checkout Session
+ *     tags:
+ *       - Billing
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - priceId
+ *             properties:
+ *               priceId:
+ *                 type: string
+ *               successUrl:
+ *                 type: string
+ *               cancelUrl:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Checkout session URL returned successfully
+ */
+router.post("/checkout-session", createCheckoutSession);
+
+/**
+ * @openapi
+ * /api/billing/customer-portal:
+ *   post:
+ *     summary: Create a Stripe Customer Portal Link
+ *     tags:
+ *       - Billing
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               returnUrl:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Portal URL returned successfully
+ */
+router.post("/customer-portal", createCustomerPortal);
+
+// ==========================================
+// Base CRUD Endpoints
+// ==========================================
 
 /**
  * @openapi
@@ -78,6 +167,10 @@ router
   .post(createBilling)
   .get(getBilling);
 
+// ==========================================
+// Parameterized ID Endpoints (Kept at bottom to prevent wildcard collision)
+// ==========================================
+
 /**
  * @openapi
  * /api/billing/{id}:
@@ -135,17 +228,8 @@ router
  */
 router
   .route("/:id")
-  .get(
-    validateBillingIdParam,
-    getBillingById
-  )
-  .put(
-    validateBillingIdParam,
-    updateBilling
-  )
-  .delete(
-    validateBillingIdParam,
-    deleteBilling
-  );
+  .get(validateBillingIdParam, getBillingById)
+  .put(validateBillingIdParam, updateBilling)
+  .delete(validateBillingIdParam, deleteBilling);
 
 export default router;

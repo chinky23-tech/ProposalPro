@@ -1,4 +1,19 @@
 // ==========================================
+// Validate Checkout Session Input
+// ==========================================
+export const validateCheckoutInput = (data) => {
+  if (!data?.priceId || !data.priceId.trim()) {
+    throw new Error("Price ID is required");
+  }
+
+  return {
+    priceId: data.priceId.trim(),
+    successUrl: data.successUrl?.trim() || null,
+    cancelUrl: data.cancelUrl?.trim() || null,
+  };
+};
+
+// ==========================================
 // Create Billing Validation
 // ==========================================
 export const validateCreateBilling = ({
@@ -49,69 +64,33 @@ export const validateUpdateBilling = ({
 }) => {
   let parsedAmount = undefined;
 
-  if (
-    plan !== undefined &&
-    (!plan || !plan.trim())
-  ) {
+  if (plan !== undefined && (!plan || !plan.trim())) {
     throw new Error("Plan cannot be empty");
   }
 
   if (amount !== undefined) {
     parsedAmount = Number(amount);
 
-    if (
-      Number.isNaN(parsedAmount) ||
-      parsedAmount < 0
-    ) {
-      throw new Error(
-        "Amount must be a valid positive number"
-      );
+    if (Number.isNaN(parsedAmount) || parsedAmount < 0) {
+      throw new Error("Amount must be a valid positive number");
     }
   }
 
   return {
-    plan:
-      plan !== undefined
-        ? plan.trim()
-        : undefined,
-
+    plan: plan !== undefined ? plan.trim() : undefined,
     amount: parsedAmount,
-
-    currency:
-      currency !== undefined
-        ? currency.trim()
-        : undefined,
-
-    status:
-      status !== undefined
-        ? status.trim()
-        : undefined,
-
-    paymentMethod:
-      paymentMethod !== undefined
-        ? paymentMethod.trim()
-        : undefined,
-
-    billingDate:
-      billingDate !== undefined
-        ? billingDate
-        : undefined,
-
-    nextBillingDate:
-      nextBillingDate !== undefined
-        ? nextBillingDate
-        : undefined,
+    currency: currency !== undefined ? currency.trim() : undefined,
+    status: status !== undefined ? status.trim() : undefined,
+    paymentMethod: paymentMethod !== undefined ? paymentMethod.trim() : undefined,
+    billingDate: billingDate !== undefined ? billingDate : undefined,
+    nextBillingDate: nextBillingDate !== undefined ? nextBillingDate : undefined,
   };
 };
 
 // ==========================================
-// Validate Billing ID
+// Validate Billing ID Parameter
 // ==========================================
-export const validateBillingIdParam = (
-  req,
-  res,
-  next
-) => {
+export const validateBillingIdParam = (req, res, next) => {
   const { id } = req.params;
 
   const regex = /^[a-zA-Z0-9-]+$/;
@@ -119,8 +98,7 @@ export const validateBillingIdParam = (
   if (!id || !regex.test(id)) {
     return res.status(400).json({
       success: false,
-      message:
-        "Invalid billing identifier.",
+      message: "Invalid billing identifier.",
     });
   }
 

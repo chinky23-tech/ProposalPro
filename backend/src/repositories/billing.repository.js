@@ -60,13 +60,25 @@ export const getAllBilling = async (userId) => {
   return result.rows;
 };
 
+export const getLatestBillingByUserId = async (userId) => {
+  const result = await pool.query(
+    `
+    SELECT *
+    FROM billing
+    WHERE user_id=$1
+    ORDER BY created_at DESC
+    LIMIT 1;
+    `,
+    [userId]
+  );
+
+  return result.rows[0] || null;
+};
+
 // ==========================================
 // Get Billing By Id
 // ==========================================
-export const getBillingById = async (
-  billingId,
-  userId
-) => {
+export const getBillingById = async (billingId, userId) => {
   const result = await pool.query(
     `
     SELECT *
@@ -129,10 +141,7 @@ export const updateBilling = async ({
 // ==========================================
 // Delete Billing
 // ==========================================
-export const deleteBilling = async (
-  billingId,
-  userId
-) => {
+export const deleteBilling = async (billingId, userId) => {
   const result = await pool.query(
     `
     DELETE FROM billing
@@ -150,12 +159,42 @@ export const deleteBilling = async (
 // ==========================================
 // Billing Exists
 // ==========================================
-export const billingExists = async (
-  billingId,
-  userId
-) => {
-  return await getBillingById(
-    billingId,
-    userId
+export const billingExists = async (billingId, userId) => {
+  return await getBillingById(billingId, userId);
+};
+
+// ==========================================
+// 🟢 STRIPE HELPERS FOR USER & SUBSCRIPTIONS
+// ==========================================
+
+export const getUserWithBilling = async (userId) => {
+  const result = await pool.query(
+    `SELECT id, email, name, stripe_customer_id FROM users WHERE id = $1;`,
+    [userId]
   );
+  return result.rows[0] || null;
+};
+
+export const updateStripeCustomerId = async (userId, stripeCustomerId) => {
+  const result = await pool.query(
+    `UPDATE users SET stripe_customer_id = $1 WHERE id = $2 RETURNING *;`,
+    [stripeCustomerId, userId]
+  );
+  return result.rows[0];
+};
+
+export const updateSubscriptionByStripeId = async (
+  stripeSubscriptionId,
+  { status, plan, currentPeriodEnd }
+) => {
+  const result = await pool.query(
+    `
+    UPDATE billing
+    SET status = $1, plan = $2, next_billing_date = $3
+    WHERE stripe_subscription_id = $4
+    RETURNING *;
+    `,
+    [status, plan, currentPeriodEnd, stripeSubscriptionId]
+  );
+  return result.rows[0];
 };
