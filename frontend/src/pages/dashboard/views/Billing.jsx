@@ -64,7 +64,7 @@ export default function BillingPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center p-8">
+      <div className="flex min-h-400px items-center justify-center p-8">
         <div className="flex items-center gap-3 text-slate-300 font-medium">
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-400 border-t-transparent" />
           <span>Loading billing details...</span>
