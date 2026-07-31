@@ -1,5 +1,3 @@
-// src/controllers/billing.controller.js
-
 import {
   createBillingService,
   getBillingService,
