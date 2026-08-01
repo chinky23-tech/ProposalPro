@@ -15,6 +15,7 @@ import documentRoutes from "./routes/document.routes.js";
 import shareRoutes from "./routes/share.routes.js";
 import billingRoutes from "./routes/billing.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
+import notificationsRoutes from "./routes/notifications.routes.js";
 const app = express();
 
 app.use(cors());
@@ -44,6 +45,7 @@ app.use("/api/documents", documentRoutes);
 app.use("/api", shareRoutes);
 app.use("/api/billing", billingRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/notifications", notificationsRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
