@@ -236,16 +236,16 @@ export default function SettingsPage() {
                     <div
                       key={item.key}
                       onClick={() => toggleNotification(item.key)}
-                      className="flex items-center justify-between p-4 rounded-xl border border-white  transition-all cursor-pointer bg-emerald-800/40"
+                      className="flex items-center justify-between p-4 rounded-xl border border-white  hover:border-slate-600 transition-all cursor-pointer bg-slate-900/90 hover:bg-slate-800"
                     >
                       <div className="space-y-0.5">
-                        <div className="text-sm font-medium text-slate-800">{item.label}</div>
-                        <div className="text-xs text-slate-900">{item.desc}</div>
+                        <div className="text-sm font-medium text-slate-200">{item.label}</div>
+                        <div className="text-xs text-slate-400">{item.desc}</div>
                       </div>
 
                       <div
                         className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ease-in-out ${
-                          notifications[item.key] ? "bg-emerald-700" : "bg-slate-700"
+                          notifications[item.key] ? "bg-emerald-500" : "bg-slate-700"
                         }`}
                       >
                         <div
