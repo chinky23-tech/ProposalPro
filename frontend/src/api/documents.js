@@ -18,7 +18,7 @@ export const documentsApi = {
   uploadDocument: async (formData) => {
     // Note: Custom fetch implementation for FormData upload
     const sessionToken = getToken();
-    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/$/, '');
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
 
     const response = await fetch(`${baseUrl}/documents/upload`, {
       method: "POST",

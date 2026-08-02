@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { CheckCircle2, XCircle, FileText, AlertCircle, Clock } from "lucide-react";
 import { toast } from "react-toastify";
 import proposalsApi from "/src/api/proposals.js";
+import { notifyNotificationChanged } from "/src/hooks/useNotifications";
 
 export default function PublicProposalView() {
   const { token } = useParams();
@@ -17,7 +18,7 @@ export default function PublicProposalView() {
       try {
         setLoading(true);
         const response = await proposalsApi.getPublicProposal(token);
-        const payload = response.data.data || response.data;
+        const payload = response.data?.data || response.data || response;
         setProposal(payload);
         if (payload.status) setActionState(payload.status);
       } catch (err) {
@@ -43,6 +44,7 @@ const handleAction = async (decision) => {
 
       setActionState(decision);
       toast.success(`Proposal marked as ${decision}!`);
+      notifyNotificationChanged();
     } catch (err) {
       toast.error(err?.message || `Failed to mark proposal as ${decision}`);
     } finally {

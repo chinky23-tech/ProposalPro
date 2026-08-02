@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify'
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/$/, '')
+const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '')
 const AUTH_STORAGE_KEY = 'proposalpro.auth'
 
 const parseResponse = async (response) => {

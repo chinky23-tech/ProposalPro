@@ -49,6 +49,21 @@ export const proposalsApi = {
       body: emailPayload,
       token,
     }),
+
+  getPublicProposal: (token) =>
+    request(`/public/proposals/share/${token}`, {
+      showErrorToast: false,
+    }),
+
+  acceptPublicProposal: (token) =>
+    request(`/public/proposals/share/${token}/accept`, {
+      method: "PATCH",
+    }),
+
+  rejectPublicProposal: (token) =>
+    request(`/public/proposals/share/${token}/reject`, {
+      method: "PATCH",
+    }),
 };
 
 export default proposalsApi;

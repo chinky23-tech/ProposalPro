@@ -8,6 +8,7 @@ import ProposalModal from "../../../components/proposals/ProposalModal";
 import proposalsApi from "../../../api/proposals";
 import { getStoredAuthSession } from "../../../api/auth";
 import { toast } from "react-toastify";
+import { notifyNotificationChanged } from "../../../hooks/useNotifications";
 
 export default function Proposals() {
   const navigate = useNavigate();
@@ -117,6 +118,7 @@ export default function Proposals() {
       await proposalsApi.markWon(proposal.id, getToken());
       toast.success("Proposal marked as Won!");
       await refresh();
+      notifyNotificationChanged();
     } catch (err) {
       toast.error(err.message || "Failed to mark as Won");
     }
@@ -127,6 +129,7 @@ export default function Proposals() {
       await proposalsApi.markLost(proposal.id, getToken());
       toast.success("Proposal marked as Lost");
       await refresh();
+      notifyNotificationChanged();
     } catch (err) {
       toast.error(err.message || "Failed to mark as Lost");
     }
@@ -141,6 +144,7 @@ export default function Proposals() {
       );
       toast.success("Proposal moved to Review");
       await refresh();
+      notifyNotificationChanged();
     } catch (err) {
       toast.error(err.message || "Failed to update proposal status");
     }
@@ -155,6 +159,7 @@ export default function Proposals() {
       );
       toast.success("Proposal marked as Viewed");
       await refresh();
+      notifyNotificationChanged();
     } catch (err) {
       toast.error(err.message || "Failed to update proposal status");
     }
@@ -179,6 +184,7 @@ export default function Proposals() {
 
       toast.success(`Proposal dispatched to ${recipientEmail}`);
       await refresh();
+      notifyNotificationChanged();
     } catch (err) {
       toast.error(err.message || "Failed to send proposal");
     }
@@ -200,6 +206,7 @@ export default function Proposals() {
       }
 
       await refresh();
+      notifyNotificationChanged();
       setShowModal(false);
       setSelectedProposal(null);
     } catch (err) {

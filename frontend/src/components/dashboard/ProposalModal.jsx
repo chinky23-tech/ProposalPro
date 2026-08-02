@@ -71,6 +71,7 @@ const ProposalModal = ({ proposal, token, onClose, onSaved }) => {
         await proposalsApi.createProposal(getPayload(), token);
       }
 
+      notifyNotificationChanged();
       onSaved();
       onClose();
     } catch (err) {
