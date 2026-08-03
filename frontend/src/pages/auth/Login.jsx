@@ -105,7 +105,7 @@ export default function LoginPage() {
                 onChange={updateField("email")}
               />
 
-              <div className="relative w-full">
+              <div className="w-full">
                 <Input
                   label="Password"
                   type={showPassword ? "text" : "password"}
@@ -113,14 +113,16 @@ export default function LoginPage() {
                   value={form.password}
                   error={errors.password}
                   onChange={updateField("password")}
+                  trailing={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-slate-400 hover:text-emerald-700 transition-colors p-1"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  }
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-32px text-slate-400 hover:text-emerald-700 transition-colors p-1"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
               </div>
 
               <div className="flex justify-end text-xs font-bold -mt-1 pl-1">

@@ -80,9 +80,7 @@ export default function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between px-8 py-4 bg-[#0a0f1d] text-white border-b border-slate-800">
-      <h1 className="text-xl font-bold tracking-tight">Settings</h1>
-
+    <header className="flex items-center justify-end px-8 py-4 bg-[#0a0f1d] text-white border-b border-slate-800">
       <div className="flex items-center space-x-4">
         
         {/* NOTIFICATIONS BELL */}

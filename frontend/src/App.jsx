@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/Signup";
+import Landing from "./pages/public/Landing";
 import ProtectedRoute from "./components/dashboard/ProtectedRoute"; 
 import Dashboard from "./pages/dashboard/Dashboard";
 import PublicProposalView from "/src/public/PublicProposalView.jsx"; 
@@ -17,8 +18,8 @@ export default function App() {
       <ToastContainer position="bottom-right" autoClose={3000} />
 
       <Routes>
-        {/* Public Landing Redirect */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Public Landing Page */}
+        <Route path="/" element={<Landing />} />
 
         <Route path="/p/:token" element={<PublicProposalView />} />
         
