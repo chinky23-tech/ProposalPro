@@ -130,7 +130,7 @@ export default function SignUpPage() {
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-38px text-slate-400 hover:text-emerald-700 transition-colors p-1"
+                  className="absolute right-3 top-[32px] text-slate-400 hover:text-emerald-700 transition-colors p-1"
                 >
                   {showPass ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -148,7 +148,7 @@ export default function SignUpPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPass(!showConfirmPass)}
-                  className="absolute right-3 top-38px text-slate-400 hover:text-emerald-700 transition-colors p-1"
+                  className="absolute right-3 top-[32px] text-slate-400 hover:text-emerald-700 transition-colors p-1"
                 >
                   {showConfirmPass ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>

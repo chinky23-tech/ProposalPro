@@ -68,7 +68,7 @@ export const authApi = {
     }),
 
   signup: ({ name, email, password }) =>
-    request('/auth/signup', {
+    request('/auth/register', {
       method: 'POST',
       body: { name, email, password },
     }),

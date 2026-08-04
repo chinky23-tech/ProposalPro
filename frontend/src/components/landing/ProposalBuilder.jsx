@@ -7,7 +7,6 @@ export default function ProposalBuilder() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center flex-row-reverse lg:flex-row">
           
-          {/* Builder Visual Mockup */}
           <div className="order-2 lg:order-1 relative">
             <div className="absolute inset-0 bg-emerald-500/10 rounded-3xl blur-3xl transform -rotate-6" />
             <div className="relative bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col">

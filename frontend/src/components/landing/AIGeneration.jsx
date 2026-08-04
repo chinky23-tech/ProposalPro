@@ -44,18 +44,16 @@ export default function AIGeneration() {
             <div className="absolute inset-0 bg-linear-to-tr from-emerald-500/20 to-teal-500/20 rounded-3xl blur-2xl" />
             <div className="relative bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
               
-              {/* Mock UI Header */}
               <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
                   <Wand2 className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h4 className="text-white font-semibold">AI Assistant</h4>
-                  <p className="text-xs text-slate-400">Generating proposal draft...</p>
+                  <h4 className="text-white font-semibold">Proposal assistant</h4>
+                  <p className="text-xs text-slate-400">Drafting a tailored response for your client</p>
                 </div>
               </div>
 
-              {/* Mock Generation Animation */}
               <div className="space-y-4">
                 <div className="h-4 bg-slate-800 rounded-full w-3/4 animate-pulse" />
                 <div className="h-4 bg-slate-800 rounded-full w-full animate-pulse" style={{ animationDelay: '0.2s' }} />
@@ -64,7 +62,7 @@ export default function AIGeneration() {
                 <div className="pt-4 border-t border-slate-800 mt-4">
                   <div className="p-4 rounded-xl bg-slate-800/50 border border-emerald-500/30">
                     <p className="text-sm text-emerald-100/80 leading-relaxed font-mono">
-                      "Based on the discovery call notes, I've drafted a comprehensive 3-phase timeline focusing on rapid MVP deployment followed by iterative scaling. The pricing has been structured to highlight the ROI in Phase 2."
+                      “I’ve structured the scope around a phased rollout, highlighted measurable outcomes, and aligned the pricing with the client’s growth goals.”
                     </p>
                   </div>
                 </div>

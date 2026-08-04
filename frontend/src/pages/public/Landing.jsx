@@ -75,7 +75,7 @@ export default function Landing() {
                 </Link>
                 <Link
                   to="/signup"
-                  className="text-sm font-semibold bg-white text-slate-950 hover:bg-emerald-50 px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center gap-2 group"
+                  className="text-sm font-semibold bg-emerald-700/95 text-slate-950 hover:bg-emerald-400 px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center gap-2 group"
                 >
                   Get Started
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
