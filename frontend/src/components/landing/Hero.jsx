@@ -13,8 +13,8 @@ export default function Hero() {
   return (
     <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
       {/* Background Blobs */}
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px] animate-pulse pointer-events-none" style={{ animationDuration: '8s' }} />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-teal-500/20 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '12s', animationDelay: '1s' }} />
+      <div className="absolute top-1/4 left-1/4 w-500px h-500px bg-emerald-500/20 rounded-full blur-[120px] animate-pulse pointer-events-none" style={{ animationDuration: '8s' }} />
+      <div className="absolute bottom-1/4 right-1/4 w-400px h-400px bg-teal-500/20 rounded-full blur-[100px] animate-pulse pointer-events-none" style={{ animationDuration: '12s', animationDelay: '1s' }} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-4xl mx-auto space-y-8">

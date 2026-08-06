@@ -25,13 +25,13 @@ export default function DashboardScreenshots() {
 
         <div className="relative mt-16 mx-auto max-w-6xl">
           {/* Ambient Glow */}
-          <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/20 via-teal-500/10 to-transparent blur-3xl rounded-full transform translate-y-1/3 scale-125 pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-t from-emerald-500/20 via-teal-500/10 to-transparent blur-3xl rounded-full transform translate-y-1/3 scale-125 pointer-events-none" />
           
           <div className="relative rounded-2xl border border-slate-700/50 bg-slate-950 shadow-[0_0_80px_rgba(16,185,129,0.08)] overflow-hidden">
             
             {/* ═══════════ SIDEBAR ═══════════ */}
             <div className="flex">
-              <div className="hidden md:flex w-56 bg-gradient-to-b from-emerald-950 via-slate-950 to-slate-950 border-r border-emerald-900/20 flex-col shrink-0">
+              <div className="hidden md:flex w-56 bg-linear-to-b from-emerald-950 via-slate-950 to-slate-950 border-r border-emerald-900/20 flex-col shrink-0">
                 {/* Logo */}
                 <div className="p-5 flex items-center gap-2">
                   <div className="p-1.5 bg-emerald-500/10 rounded-lg border border-emerald-400/20">
@@ -63,7 +63,7 @@ export default function DashboardScreenshots() {
                         key={item.label}
                         className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold ${
                           item.active
-                            ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-900/30"
+                            ? "bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-900/30"
                             : "text-emerald-100/50 hover:text-white"
                         }`}
                       >
