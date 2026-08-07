@@ -5,8 +5,8 @@ import {
   updateWorkspaceAPI,
   updateNotificationsAPI,
   updatePasswordAPI,
-} from "/src/api/settings";
-import { saveAuthSession, getStoredAuthSession } from "/src/api/auth";
+} from "../api/settings";
+import { saveAuthSession, getStoredAuthSession } from "../api/auth";
 
 export function useSettings() {
   const [activeTab, setActiveTab] = useState("profile");

@@ -4,8 +4,8 @@ import {
   MapPin, Edit2, Trash2, Loader2, AlertCircle, CheckCircle2, X, AlertTriangle, Eye 
 } from "lucide-react";
 
-import { useClients } from "/src/hooks/useClients.js";
-import ClientModal from "/src/components/clients/ClientModal.jsx";
+import { useClients } from "../../../hooks/useClients.js";
+import ClientModal from "../../../components/clients/ClientModal.jsx";
 
 // Helper to reliably render address text
 const getClientAddress = (client) => {

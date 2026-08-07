@@ -8,7 +8,7 @@ import SignUp from "./pages/auth/Signup";
 import Landing from "./pages/public/Landing";
 import ProtectedRoute from "./components/dashboard/ProtectedRoute"; 
 import Dashboard from "./pages/dashboard/Dashboard";
-import PublicProposalView from "/src/public/PublicProposalView.jsx"; 
+import PublicProposalView from "./public/PublicProposalView"; 
 
 // Dashboard shell handles its own view rendering
 

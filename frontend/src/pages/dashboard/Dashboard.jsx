@@ -13,7 +13,7 @@ import Analytics from "./views/Analytics";
 import Team from "./views/Team";
 import Billing from "./views/Billing";
 import Settings from "./views/Settings";
-import ProposalPreview from "/src/components/proposals/ProposalPreview.jsx";
+import ProposalPreview from "../../components/proposals/ProposalPreview";
 
 export default function Dashboard() {
 return ( <DashboardLayout> <Routes>

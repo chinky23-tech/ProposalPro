@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { CheckCircle2, XCircle, FileText, AlertCircle, Clock } from "lucide-react";
 import { toast } from "react-toastify";
-import proposalsApi from "/src/api/proposals.js";
-import { notifyNotificationChanged } from "/src/hooks/useNotifications";
+import proposalsApi from "../api/proposals.js";
+import { notifyNotificationChanged } from "../hooks/useNotifications";
 
 export default function PublicProposalView() {
   const { token } = useParams();

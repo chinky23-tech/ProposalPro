@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { request, getStoredAuthSession } from "/src/api/auth";
+import { request, getStoredAuthSession } from "../api/auth";
 
 export function notifyNotificationChanged() {
   window.dispatchEvent(new CustomEvent("notification-updated"));

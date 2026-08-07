@@ -114,7 +114,7 @@ import {
   BarChart3, TrendingUp, Users, FileText, DollarSign, 
   ArrowUpRight, RefreshCw, AlertCircle, CheckCircle2, X 
 } from "lucide-react";
-import { useAnalytics } from "/src/hooks/useAnalytics.js";
+import { useAnalytics } from "../../../hooks/useAnalytics.js";
 
 export default function Analytics() {
   const { data, loading, error, refetch } = useAnalytics();

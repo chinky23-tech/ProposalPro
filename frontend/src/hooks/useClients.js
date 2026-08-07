@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import clientsApi from "/src/api/clients.js";
+import clientsApi from "../api/clients.js";
 
 // Helper function to safely extract address from various potential API keys
 const normalizeClient = (client) => {

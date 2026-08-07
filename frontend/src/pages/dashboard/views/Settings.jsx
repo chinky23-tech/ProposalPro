@@ -1,5 +1,5 @@
 import React from "react";
-import { useSettings } from "/src/hooks/useSettings";
+import { useSettings } from "../../../hooks/useSettings";
 
 // Icons
 import {
@@ -13,11 +13,11 @@ import {
 } from "lucide-react";
 
 // UI Components
-import { Input } from "/src/components/ui/Input";
-import { Button } from "/src/components/ui/Button";
-import { Card } from "/src/components/ui/Card";
-import { Select } from "/src/components/ui/Select";
-import { Modal } from "/src/components/ui/Modal";
+import { Input } from "../../../components/ui/Input";
+import { Button } from "../../../components/ui/Button";
+import { Card } from "../../../components/ui/Card";
+import { Select } from "../../../components/ui/Select";
+import { Modal } from "../../../components/ui/Modal";
 
 export default function SettingsPage() {
   const {

@@ -15,8 +15,8 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 
-import proposalsApi from "/src/api/proposals.js"; 
-import { getStoredAuthSession } from "/src/api/auth.js";
+import proposalsApi from "../../api/proposals.js"; 
+import { getStoredAuthSession } from "../../api/auth.js";
 
 export default function ProposalPreview() {
   const { id } = useParams();

@@ -11,8 +11,8 @@ import {
   Trophy, 
   Clock 
 } from "lucide-react";
-import { clearAuthSession, getStoredAuthSession } from "/src/api/auth";
-import { useNotifications } from "/src/hooks/useNotifications"; 
+import { clearAuthSession, getStoredAuthSession } from "../../api/auth";
+import { useNotifications } from "../../hooks/useNotifications"; 
 
 export default function Header() {
   const navigate = useNavigate();
