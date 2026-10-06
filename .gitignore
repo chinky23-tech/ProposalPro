@@ -1,5 +1,11 @@
+node_modules/
 **/node_modules/
 .env
-.env.example
+.env.local
+.env.development.local
 dist/
 build/
+
+.env.example
+.env.development
+.env.production
