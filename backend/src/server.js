@@ -16,22 +16,34 @@ import shareRoutes from "./routes/share.routes.js";
 import billingRoutes from "./routes/billing.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
+
 const app = express();
 
-app.use(cors());
-app.use(json());
+// CORS — allow your Vercel frontend and local dev
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://proposal-pro-gamma.vercel.app",
+];
 
 app.use(
-"/api-docs",
-swaggerUi.serve,
-swaggerUi.setup(swaggerSpec)
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, mobile apps, etc.)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
 );
 
+app.use(json());
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 app.get("/api/health", (req, res) => {
-res.json({
-success: true,
-message: "API running",
-});
+  res.json({ success: true, message: "API running" });
 });
 
 app.use("/api/auth", authRoutes);
@@ -46,14 +58,11 @@ app.use("/api", shareRoutes);
 app.use("/api/billing", billingRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/notifications", notificationsRoutes);
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-console.log(
-`Server running on port ${PORT}`
-);
 
-console.log(
-`Swagger docs available at http://localhost:${PORT}/api-docs`
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Swagger docs available at /api-docs`);
 });
