@@ -3,7 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 
 import Overview from "./views/Overview";
-import AIBuilder from "./views/AIBuilder";
+import AIBuilder from "./views/AIBuilder.jsx";
+
 import Proposals from "./views/Proposals";
 import Templates from "./views/Templates";
 import Packages from "./views/Packages";
