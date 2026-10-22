@@ -19,18 +19,35 @@ import notificationsRoutes from "./routes/notifications.routes.js";
 
 const app = express();
 
-// CORS — allow your Vercel frontend and local dev
+// CORS — allow your Vercel frontend, env variables, and local dev
+const envOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.CLIENT_URL,
+  process.env.CORS_ORIGIN,
+]
+  .filter(Boolean)
+  .map((url) => url.replace(/\/$/, ""));
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://proposal-pro-gamma.vercel.app",
+  ...envOrigins,
 ];
 
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (Postman, mobile apps, etc.)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    const cleanOrigin = origin.replace(/\/$/, "");
+    if (
+      allowedOrigins.includes(cleanOrigin) ||
+      cleanOrigin.endsWith(".vercel.app")
+    ) {
+      return callback(null, true);
+    }
+
     console.warn("CORS blocked for origin:", origin);
     return callback(new Error("Not allowed by CORS"));
   },
