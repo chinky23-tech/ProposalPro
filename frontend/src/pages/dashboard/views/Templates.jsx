@@ -220,7 +220,7 @@ export default function Templates() {
           </p>
         </div>
         
-        {!loading && totalTemplates > 0 && (
+        {!loading && (
           <Button
             onClick={handleOpenCreateModal}
             className="bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2 shadow-lg shadow-emerald-950/20 px-4 h-11 rounded-xl transition-all"
@@ -296,7 +296,7 @@ export default function Templates() {
           <p className="text-xs text-slate-500 tracking-wider font-medium">LOADING TEMPLATES...</p>
         </div>
       ) : totalTemplates === 0 ? (
-        <TemplateEmptyState onCreateClick={handleOpenCreateModal} />
+        <TemplateEmptyState onCreate={handleOpenCreateModal} onCreateClick={handleOpenCreateModal} />
       ) : (
         <TemplateGrid 
           templates={filteredTemplates} 

@@ -3,7 +3,9 @@ import Button from "../ui/Button";
 
 export default function TemplateEmptyState({
   onCreate,
+  onCreateClick,
 }) {
+  const handleClick = onCreateClick || onCreate;
   return (
     <div className="rounded-3xl border border-dashed border-slate-700 bg-slate-900 p-12 text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10">
@@ -19,7 +21,7 @@ export default function TemplateEmptyState({
       </p>
 
       <Button
-        onClick={onCreate}
+        onClick={handleClick}
         className="mt-6"
       >
         <Plus className="mr-2 h-4 w-4" />
