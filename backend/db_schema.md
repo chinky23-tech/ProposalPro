@@ -104,7 +104,9 @@ Represents reusable proposal templates created by users.
 - **user_id** (`INTEGER`): Foreign key referencing `users.id` with `ON DELETE CASCADE`.
 - **title** (`VARCHAR(255)`): Template title name.
 - **content** (`TEXT`): Rich text template content outline.
+- **category** (`VARCHAR(100)`): Template category tag (e.g. Web Development, UI/UX Design).
 - **created_at** (`TIMESTAMP`): Creation time (without timezone).
+- **updated_at** (`TIMESTAMP`): Last modified timestamp.
 
 ### 5. `packages`
 Represents agency pricing packages and service offerings.
