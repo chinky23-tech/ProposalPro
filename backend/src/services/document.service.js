@@ -1,19 +1,44 @@
 import * as documentRepository from "../repositories/document.repository.js";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import dotenv from "dotenv";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsDir = path.join(__dirname, "../../uploads");
 
+const isS3Configured = () => {
+  const key = process.env.AWS_ACCESS_KEY_ID;
+  const secret = process.env.AWS_SECRET_ACCESS_KEY;
+  const bucket = process.env.AWS_S3_BUCKET_NAME;
 
-// 1. Initialize the S3 Client using environment variables
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "us-east-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-});
+  return Boolean(
+    key &&
+    key !== "your_access_key" &&
+    secret &&
+    secret !== "your_secret_key" &&
+    bucket &&
+    bucket !== "your_actual_bucket_name"
+  );
+};
+
+// Initialize S3 client only when needed
+let s3Client = null;
+const getS3Client = () => {
+  if (!s3Client && isS3Configured()) {
+    s3Client = new S3Client({
+      region: process.env.AWS_REGION || "us-east-1",
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+    });
+  }
+  return s3Client;
+};
 
 const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
 
@@ -21,7 +46,7 @@ const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
  * Uploads a file buffer directly to AWS S3
  */
 const uploadToCloudStorage = async (fileBuffer, fileName, mimeType, fileType) => {
-  // Organize assets neatly into folder structures inside your bucket
+  const s3 = getS3Client();
   const s3Key = `assets/${fileType.toLowerCase()}/${fileName}`;
 
   const command = new PutObjectCommand({
@@ -31,18 +56,28 @@ const uploadToCloudStorage = async (fileBuffer, fileName, mimeType, fileType) =>
     ContentType: mimeType,
   });
 
-  await s3Client.send(command);
-
-  // Return the permanent base S3 URL format
+  await s3.send(command);
   return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || "us-east-1"}.amazonaws.com/${s3Key}`;
 };
 
 /**
- * Generates a short-lived, highly secure presigned URL for private file access
+ * Saves a file buffer locally as fallback when AWS S3 is not configured
+ */
+const saveToLocalStorage = async (fileBuffer, fileName) => {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  const filePath = path.join(uploadsDir, fileName);
+  await fs.promises.writeFile(filePath, fileBuffer);
+  return `/uploads/${fileName}`;
+};
+
+/**
+ * Generates a short-lived presigned URL for private S3 file access
  */
 const generateSecurePresignedUrl = async (fileUrl) => {
-  // Extract the unique S3 Key path out of the full permanent URL
-  // e.g., "https://bucket.s3.region.amazonaws.com/assets/pdf/file.pdf" -> "assets/pdf/file.pdf"
+  const s3 = getS3Client();
   const urlParts = fileUrl.split(`.amazonaws.com/`);
   if (urlParts.length < 2) throw new Error("Invalid S3 URL string structured during parsing");
   const s3Key = urlParts[1];
@@ -52,37 +87,59 @@ const generateSecurePresignedUrl = async (fileUrl) => {
     Key: s3Key,
   });
 
-  // Generate a link that automatically expires after 15 minutes (900 seconds)
-  return await getSignedUrl(s3Client, command, { expiresIn: 900 });
+  return await getSignedUrl(s3, command, { expiresIn: 900 });
 };
 
 /**
- * Removes a file binary physically from the AWS S3 Bucket storage layer
+ * Removes a file binary from AWS S3 Bucket or local storage
  */
-const deleteFromCloudStorage = async (fileUrl) => {
-  const urlParts = fileUrl.split(`.amazonaws.com/`);
-  if (urlParts.length < 2) return; // Fail-safe check
-  const s3Key = urlParts[1];
+const deleteFromStorage = async (fileUrl) => {
+  if (fileUrl.startsWith("/uploads/")) {
+    const fileName = path.basename(fileUrl);
+    const filePath = path.join(uploadsDir, fileName);
+    if (fs.existsSync(filePath)) {
+      await fs.promises.unlink(filePath).catch(() => {});
+    }
+    return;
+  }
 
-  const command = new DeleteObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: s3Key,
-  });
+  if (isS3Configured()) {
+    const s3 = getS3Client();
+    const urlParts = fileUrl.split(`.amazonaws.com/`);
+    if (urlParts.length < 2) return;
+    const s3Key = urlParts[1];
 
-  await s3Client.send(command);
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+    });
+
+    await s3.send(command).catch((err) => {
+      console.warn("Failed to delete S3 object:", err.message);
+    });
+  }
 };
 
 /* ==========================================
    Core Service Export Logic Layers
    ========================================== */
 
+export const getDocumentsByUser = async (userId) => {
+  return await documentRepository.findByOwnerId(userId);
+};
+
 export const processUpload = async ({ file, fileType, relationType, relationId, ownerId }) => {
   const fileExtension = file.originalname.split(".").pop();
   const uniqueId = crypto.randomUUID();
   const uniqueFileName = `${uniqueId}-${Date.now()}.${fileExtension}`;
 
-  // Upload the live binary buffer chunk array to AWS S3
-  const cloudUrl = await uploadToCloudStorage(file.buffer, uniqueFileName, file.mimetype, fileType);
+  let cloudUrl;
+  if (isS3Configured()) {
+    cloudUrl = await uploadToCloudStorage(file.buffer, uniqueFileName, file.mimetype, fileType);
+  } else {
+    console.log("AWS S3 not configured or using placeholders. Falling back to local storage.");
+    cloudUrl = await saveToLocalStorage(file.buffer, uniqueFileName);
+  }
 
   const documentData = {
     fileName: file.originalname,
@@ -90,9 +147,9 @@ export const processUpload = async ({ file, fileType, relationType, relationId, 
     fileType: fileType,
     mimeType: file.mimetype,
     fileSize: file.size,
-    ownerId: ownerId,
+    ownerId: String(ownerId),
     relationType: relationType || null,
-    relationId: relationId || null
+    relationId: relationId ? String(relationId) : null,
   };
 
   return await documentRepository.create(documentData);
@@ -106,9 +163,13 @@ export const getSecureDownloadUrl = async (id, userId) => {
     throw new Error("Unauthorized access to this document");
   }
 
-  // Security layer: Private files (PDFs, Contracts) generate an authenticated link.
-  // Public files (profile avatars, decorative inline dashboard images) can return safely directly.
-  if (["CONTRACT", "PRICING", "PDF"].includes(document.file_type)) {
+  // If stored locally
+  if (document.file_url.startsWith("/uploads/")) {
+    return document.file_url;
+  }
+
+  // If stored on AWS S3
+  if (isS3Configured() && ["CONTRACT", "PRICING", "PDF"].includes(document.file_type)) {
     return await generateSecurePresignedUrl(document.file_url);
   }
 
@@ -123,9 +184,6 @@ export const processDelete = async (id, userId) => {
     throw new Error("Unauthorized to delete this document");
   }
 
-  // 1. Purge physical binary from the AWS Cloud Storage block
-  await deleteFromCloudStorage(document.file_url);
-
-  // 2. Clear out row footprint out of SQL database
+  await deleteFromStorage(document.file_url);
   return await documentRepository.deleteById(id);
 };

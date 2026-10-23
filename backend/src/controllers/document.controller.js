@@ -1,5 +1,20 @@
 import * as documentValidation from "../validations/document.validation.js";
 import * as documentService from "../services/document.service.js";
+
+export const getDocuments = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const documents = await documentService.getDocumentsByUser(userId);
+    return res.status(200).json({
+      success: true,
+      data: documents
+    });
+  } catch (error) {
+    console.error("Error in getDocuments controller:", error);
+    return res.status(500).json({ success: false, message: "Internal server error fetching documents" });
+  }
+};
+
 export const uploadDocument = async (req, res) => {
   try {
     const file = req.file;

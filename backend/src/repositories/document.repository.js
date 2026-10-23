@@ -47,6 +47,16 @@ export const findByRelation = async (relationType, relationId) => {
   return result.rows;
 };
 
+export const findByOwnerId = async (ownerId) => {
+  const query = `
+    SELECT * FROM documents 
+    WHERE owner_id = $1 
+    ORDER BY created_at DESC;
+  `;
+  const result = await pool.query(query, [String(ownerId)]);
+  return result.rows;
+};
+
 export const deleteById = async (id) => {
   const query = `DELETE FROM documents WHERE id = $1 RETURNING id;`;
   const result = await pool.query(query, [id]);

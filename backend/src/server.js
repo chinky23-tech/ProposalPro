@@ -1,5 +1,10 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import "dotenv/config";
 import express, { json } from "express";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
@@ -63,6 +68,7 @@ app.use(cors(corsOptions));
 
 
 app.use(json());
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

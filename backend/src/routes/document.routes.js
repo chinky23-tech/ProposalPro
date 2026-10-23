@@ -2,6 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import protect from "../middleware/auth.middleware.js";
 import {
+  getDocuments,
   uploadDocument,
   getDocumentDownloadUrl,
   deleteDocument,
@@ -15,6 +16,8 @@ const upload = multer({ storage: storage });
 
 // Apply authentication middleware globally to all routes below
 router.use(protect);
+
+router.get("/", getDocuments);
 
 /**
  * @openapi
