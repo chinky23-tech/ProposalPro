@@ -47,7 +47,7 @@ export default function Documents() {
   // Filtered List
   const filteredDocs = useMemo(() => {
     return documents.filter((doc) =>
-      (doc.name || doc.filename || "Untitled").toLowerCase().includes(search.toLowerCase())
+      (doc.file_name || doc.name || doc.filename || "Untitled").toLowerCase().includes(search.toLowerCase())
     );
   }, [documents, search]);
 
@@ -70,8 +70,12 @@ export default function Documents() {
   const handleDownload = async (doc) => {
     try {
       const res = await documentsApi.getDownloadUrl(doc.id, getToken());
-      const downloadUrl = res.url || res.downloadUrl || res.data;
+      let downloadUrl = res.url || res.downloadUrl || res.data;
       if (downloadUrl) {
+        if (downloadUrl.startsWith("/uploads/")) {
+          const apiBase = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
+          downloadUrl = `${apiBase}${downloadUrl}`;
+        }
         window.open(downloadUrl, "_blank");
       } else {
         toast.error("Download URL not found");
@@ -192,7 +196,7 @@ export default function Documents() {
                 {/* File Header Icon & Actions */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-10 h-10 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center">
-                    {getFileIcon(doc.mime_type, doc.name || doc.filename)}
+                    {getFileIcon(doc.mime_type, doc.file_name || doc.name || doc.filename)}
                   </div>
 
                   <div className="flex items-center gap-2 text-slate-400">
@@ -214,12 +218,18 @@ export default function Documents() {
                 </div>
 
                 {/* Name & Details */}
-                <h3 className="font-bold text-white text-sm truncate">
-                  {doc.name || doc.filename || "Untitled File"}
+                <h3 className="font-bold text-white text-sm truncate" title={doc.file_name || doc.name || doc.filename}>
+                  {doc.file_name || doc.name || doc.filename || "Untitled File"}
                 </h3>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Uploaded {doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "Recently"}
-                </p>
+                <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
+                  <span>{doc.created_at ? new Date(doc.created_at).toLocaleDateString() : "Recently"}</span>
+                  {doc.file_size && (
+                    <>
+                      <span>•</span>
+                      <span>{(doc.file_size / (1024 * 1024)).toFixed(2)} MB</span>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Bottom Quick Download Button */}
