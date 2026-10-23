@@ -16,6 +16,7 @@ import shareRoutes from "./routes/share.routes.js";
 import billingRoutes from "./routes/billing.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
+import { runMigrations } from "./db/migrate.js";
 
 const app = express();
 
@@ -67,6 +68,15 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "API running" });
+});
+
+app.get("/api/migrate", async (req, res) => {
+  try {
+    await runMigrations();
+    res.json({ success: true, message: "Migrations executed successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 app.use("/api/auth", authRoutes);
